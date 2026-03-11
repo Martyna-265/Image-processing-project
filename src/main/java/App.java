@@ -22,8 +22,12 @@ public class App {
             toolBar.add(new JButton("text"));
             frame.add(toolBar, BorderLayout.PAGE_START);
 
-            JPanel photoPanel = new PhotoPanel();
+            PhotoPanel photoPanel = new PhotoPanel();
             frame.add(photoPanel, BorderLayout.CENTER);
+            frame.addWindowStateListener(e -> {
+                photoPanel.recalculateSize();
+            });
+
             frame.setVisible(true);
         });
     }

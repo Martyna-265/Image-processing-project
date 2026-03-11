@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -10,6 +12,8 @@ import javax.swing.JPanel;
 public class PhotoPanel extends JPanel {
 
     private BufferedImage image;
+    private Image scaledImage;
+    private Dimension maxDimension;
 
     public PhotoPanel() {
         super();
@@ -21,24 +25,47 @@ public class PhotoPanel extends JPanel {
             e.printStackTrace();
         }
 
-        //Dimension dimension = new Dimension(image.getWidth()/10, image.getHeight()/10);
-        //setSize(dimension);
-        setSize(5, 5);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                maxDimension = new Dimension(getWidth() - 500, getHeight() - 50);
+                repaint();
+            }
+        });
     }
 
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (maxDimension == null || image == null) {
+            return;
+        }
+
         Graphics2D g2d = (Graphics2D) g;
-        Image scaledImage = image.getScaledInstance(800, 400, Image.SCALE_SMOOTH);
+        scaleImage();
         g2d.drawImage(scaledImage, 0, 0, this);
     }
 
-//    @Override
-//    public void paint(Graphics2D g2){
-//        AffineTransform at = new AffineTransform();
-//        at.translate((int)x + radius/2.5,(int)y + radius/2.5);
-//        at.rotate(Math.PI/2 + angle);
-//        at.translate(-iconeNave.getWidth()/2, -iconeNave.getHeight()/2);
-//        g2.drawImage(iconeNave, at, null);
-//    }
+    public void recalculateSize() {
+        maxDimension = new Dimension(getWidth() - 200, getHeight() - 50);
+        revalidate();
+        repaint();
+    }
+
+
+    private void scaleImage() {
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
+        double imageScale = (double) imageWidth / imageHeight;
+
+        int newImageWidth = Math.min(imageWidth, maxDimension.width);
+        int newImageHeight = (int) Math.round(newImageWidth / imageScale);
+        if (newImageHeight > maxDimension.height) {
+            newImageHeight = maxDimension.height;
+            newImageWidth = (int) Math.round(newImageHeight * imageScale);
+        }
+
+        scaledImage = image.getScaledInstance(newImageWidth, newImageHeight, Image.SCALE_SMOOTH);
+    }
 }
