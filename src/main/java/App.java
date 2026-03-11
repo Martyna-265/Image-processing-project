@@ -15,18 +15,18 @@ public class App {
 
         SwingUtilities.invokeLater(() -> {
 
-            JFrame frame = new JFrame("Image processing app");
+            JFrame frame = new JFrame("Default Image");
+            frame.setSize(800, 600);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLayout(new BorderLayout());
 
             PhotoPanel photoPanel = new PhotoPanel();
 
-            MenuBar menuBar = new MenuBar(photoPanel);
+
+            MenuBar menuBar = new MenuBar(frame, photoPanel);
             frame.setJMenuBar(menuBar);
 
             frame.add(photoPanel, BorderLayout.CENTER);
-
-            frame.setSize(800, 600);
             frame.setLocationRelativeTo(null);
 
             frame.addWindowStateListener(e -> {
