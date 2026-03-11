@@ -3,8 +3,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
 public class MenuBar extends JMenuBar {
+    private PhotoPanel photoPanel;
 
-    public MenuBar() {
+    public MenuBar(PhotoPanel photoPanel) {
+        this.photoPanel = photoPanel;
 
         JMenu fileMenu = setupFileMenu();
         JMenu displayMenu = setupDisplayMenu();
@@ -54,8 +56,8 @@ public class MenuBar extends JMenuBar {
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-
-            // TODO: load the image here
+            String filepath = selectedFile.getAbsolutePath();
+            photoPanel.changeImage(filepath);
         }
     }
 

@@ -18,7 +18,7 @@ public class PhotoPanel extends JPanel {
     public PhotoPanel() {
         super();
 
-        File imageFile = new File("src/java.jpg");
+        File imageFile = new File("src/testImage.jpg");
         try {
             image = ImageIO.read(imageFile);
         } catch (IOException e) {
@@ -67,5 +67,15 @@ public class PhotoPanel extends JPanel {
         }
 
         scaledImage = image.getScaledInstance(newImageWidth, newImageHeight, Image.SCALE_SMOOTH);
+    }
+
+    public void changeImage(String filepath){
+        File imageFile = new File(filepath);
+        try {
+            image = ImageIO.read(imageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        repaint();
     }
 }
