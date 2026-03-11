@@ -27,7 +27,7 @@ public class PhotoPanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                maxDimension = new Dimension(getWidth() - 500, getHeight() - 50);
+                maxDimension = new Dimension(getWidth() - 500, getHeight());
                 repaint();
             }
         });
