@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -59,8 +58,9 @@ public class PhotoPanel extends JPanel {
         int imageHeight = image.getHeight();
         double imageScale = (double) imageWidth / imageHeight;
 
-        int newImageWidth = Math.min(imageWidth, maxDimension.width);
+        int newImageWidth = maxDimension.width;
         int newImageHeight = (int) Math.round(newImageWidth / imageScale);
+
         if (newImageHeight > maxDimension.height) {
             newImageHeight = maxDimension.height;
             newImageWidth = (int) Math.round(newImageHeight * imageScale);
