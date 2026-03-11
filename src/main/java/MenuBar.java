@@ -4,9 +4,11 @@ import java.io.File;
 
 public class MenuBar extends JMenuBar {
     private PhotoPanel photoPanel;
+    private JFrame frame;
 
-    public MenuBar(PhotoPanel photoPanel) {
+    public MenuBar(JFrame frame, PhotoPanel photoPanel) {
         this.photoPanel = photoPanel;
+        this.frame = frame;
 
         JMenu fileMenu = setupFileMenu();
         JMenu displayMenu = setupDisplayMenu();
@@ -50,14 +52,16 @@ public class MenuBar extends JMenuBar {
         FileNameExtensionFilter filter =
                 new FileNameExtensionFilter("Image files", "jpg", "jpeg", "png", "bmp");
         fc.setFileFilter(filter);
+        fc.setAcceptAllFileFilterUsed(false);
 
         int result = fc.showOpenDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fc.getSelectedFile();
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
             String filepath = selectedFile.getAbsolutePath();
+            String filename = selectedFile.getName();
             photoPanel.changeImage(filepath);
+            frame.setTitle(filename);
         }
     }
 

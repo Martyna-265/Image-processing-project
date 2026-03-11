@@ -13,7 +13,7 @@ public class App {
 
         SwingUtilities.invokeLater(() -> {
 
-            JFrame frame = new JFrame("Image processing app");
+            JFrame frame = new JFrame("Default Image");
             frame.setSize(800, 600);
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -23,7 +23,7 @@ public class App {
             PhotoPanel photoPanel = new PhotoPanel();
 
 
-            MenuBar menuBar = new MenuBar(photoPanel);
+            MenuBar menuBar = new MenuBar(frame, photoPanel);
             frame.setJMenuBar(menuBar);
 
             frame.add(photoPanel, BorderLayout.CENTER);
