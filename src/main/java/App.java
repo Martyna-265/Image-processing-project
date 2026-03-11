@@ -1,5 +1,6 @@
 import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
+import java.awt.*;
 
 public class App {
     public static void main(String[] args) {
@@ -8,11 +9,21 @@ public class App {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Swing App");
-            frame.setSize(400, 300);
+            JFrame frame = new JFrame("Image processing app");
+            frame.setSize(800, 600);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.add(new JLabel("Hello Team!", SwingConstants.CENTER));
+
+            frame.setLayout(new BorderLayout());
+
+            JToolBar toolBar = new JToolBar();
+            toolBar.add(new JButton("text"));
+            frame.add(toolBar, BorderLayout.PAGE_START);
+
+            JPanel photoPanel = new PhotoPanel();
+            frame.add(photoPanel, BorderLayout.CENTER);
             frame.setVisible(true);
         });
     }
