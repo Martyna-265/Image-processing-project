@@ -14,23 +14,29 @@ public class EditMenu extends JMenu {
         JMenuItem undoItem = new JMenuItem("Undo");
         JMenuItem grayScaleItem = new JMenuItem("Convert to gray scale");
         JMenuItem negativeItem = new JMenuItem("Create a negative");
-        JMenuItem brightnessItem = new JMenuItem("Brightness");
+        JMenuItem brightnessItem = new JMenuItem("Change brightness");
+        JMenuItem contrastItem = new JMenuItem("Change contrast");
 
         undoItem.addActionListener(e -> onUndo());
         grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
         brightnessItem.addActionListener(e -> onBrightness());
+        contrastItem.addActionListener(e -> onContrast());
 
         this.add(undoItem);
         this.add(grayScaleItem);
         this.add(negativeItem);
         this.add(brightnessItem);
+        this.add(contrastItem);
     }
 
     private void onUndo() {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(lastImageMatrix);
         lastImageMatrix = temp;
+        if (optionPanel != null) {
+            optionPanel.refreshOnImport();
+        }
     }
 
     private void onGrayScale() {
@@ -55,6 +61,9 @@ public class EditMenu extends JMenu {
         }
 
         photoPanel.setImageMatrix(newImageMatrix);
+        if (optionPanel != null) {
+            optionPanel.refreshOnImport();
+        }
     }
 
     private void onNegative() {
@@ -73,9 +82,20 @@ public class EditMenu extends JMenu {
         }
 
         photoPanel.setImageMatrix(newImageMatrix);
+        if (optionPanel != null) {
+            optionPanel.refreshOnImport();
+        }
     }
 
     private void onBrightness() {
         optionPanel.onBrightness();
+    }
+
+    private void onContrast() {
+        optionPanel.onContrast();
+    }
+
+    public void setLastImageMatrix(int[][][] newMatrix) {
+        this.lastImageMatrix = newMatrix;
     }
 }

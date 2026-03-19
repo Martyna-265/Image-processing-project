@@ -7,6 +7,7 @@ public class MenuBar extends JMenuBar {
     private int[][][] lastImageMatrix;
     private JFrame frame;
     private OptionPanel optionPanel;
+    private EditMenu editMenu;
 
     public MenuBar(JFrame frame, PhotoPanel photoPanel, OptionPanel optionPanel) {
         this.photoPanel = photoPanel;
@@ -16,7 +17,7 @@ public class MenuBar extends JMenuBar {
 
         JMenu fileMenu = setupFileMenu();
         JMenu displayMenu = setupDisplayMenu();
-        JMenu editMenu = setupEditMenu();
+        editMenu = new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel);
 
         add(fileMenu);
         add(displayMenu);
@@ -44,10 +45,6 @@ public class MenuBar extends JMenuBar {
         return displayMenu;
     }
 
-    private JMenu setupEditMenu(){
-        return new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel);
-    }
-
     private void onImport() {
         JFileChooser fc = new JFileChooser();
 
@@ -65,6 +62,8 @@ public class MenuBar extends JMenuBar {
             photoPanel.changeImage(filepath);
             frame.setTitle(filename);
             lastImageMatrix = photoPanel.getImageMatrix();
+            editMenu.setLastImageMatrix(lastImageMatrix);
+            optionPanel.refreshOnImport();
         }
     }
 

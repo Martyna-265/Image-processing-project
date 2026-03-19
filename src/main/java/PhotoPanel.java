@@ -120,7 +120,7 @@ public class PhotoPanel extends JPanel {
                 int g = imageMatrix[y][x][1];
                 int b = imageMatrix[y][x][2];
 
-                int rgb = (r << 16) | (g << 8) | b;
+                int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
                 image.setRGB(x, y, rgb);
             }
         }
