@@ -20,12 +20,15 @@ public class App {
 
             PhotoPanel photoPanel = new PhotoPanel();
 
+            OptionPanel optionPanel = new OptionPanel(photoPanel);
+            optionPanel.setPreferredSize(new Dimension(400, 0));
 
-            MenuBar menuBar = new MenuBar(frame, photoPanel);
+            MenuBar menuBar = new MenuBar(frame, photoPanel, optionPanel);
             frame.setJMenuBar(menuBar);
 
             frame.add(photoPanel, BorderLayout.CENTER);
             frame.setLocationRelativeTo(null);
+            frame.add(optionPanel, BorderLayout.EAST);
 
             frame.addWindowStateListener(e -> {
                 photoPanel.recalculateSize();

@@ -29,7 +29,7 @@ public class PhotoPanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                maxDimension = new Dimension(getWidth() - 500, getHeight());
+                maxDimension = new Dimension(getWidth(), getHeight());
                 repaint();
             }
         });
@@ -45,6 +45,7 @@ public class PhotoPanel extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         scaleImage();
+
         g2d.drawImage(scaledImage, 0, 0, this);
     }
 
