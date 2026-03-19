@@ -6,9 +6,25 @@ public class OptionPanel extends JPanel {
     private PhotoPanel photoPanel;
     private int[][][] originalMatrix;
     private JSlider brightnessSlider;
+    private boolean isGrayscaleApplied = false;
+    private EditMenu editMenu;
+    private JButton grayscaleBtn;
+    private JLabel spinnerLabel;
+    private JSpinner thresholdSpinner;
+    private JButton applyBinarizationBtn;
 
     public OptionPanel(PhotoPanel photoPanel) {
         this.photoPanel = photoPanel;
+    }
+
+    public void setEditMenu(EditMenu editMenu) {
+        this.editMenu = editMenu;
+    }
+
+    private void saveUndoState() {
+        if (editMenu != null && originalMatrix != null) {
+            editMenu.setLastImageMatrix(originalMatrix);
+        }
     }
 
     public void onBrightness() {
@@ -27,6 +43,7 @@ public class OptionPanel extends JPanel {
         brightnessSlider.setMaximumSize(new Dimension(Integer.MAX_VALUE, brightnessSlider.getPreferredSize().height));
 
         originalMatrix = photoPanel.getImageMatrix();
+        saveUndoState();
 
         brightnessSlider.addChangeListener(e -> {
             int offset = brightnessSlider.getValue();
@@ -52,6 +69,7 @@ public class OptionPanel extends JPanel {
         JButton applyRangeBtn = new JButton("Apply");
         applyRangeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         applyRangeBtn.addActionListener(e -> {
+            saveUndoState();
             int n1 = (int) n1Spinner.getValue();
             int n2 = (int) n2Spinner.getValue();
             applyBrightnessRange(n1, n2);
@@ -160,6 +178,12 @@ public class OptionPanel extends JPanel {
         if (brightnessSlider != null) {
             brightnessSlider.setValue(0);
         }
+
+        isGrayscaleApplied = false;
+        if (grayscaleBtn != null) grayscaleBtn.setEnabled(true);
+        if (spinnerLabel != null) spinnerLabel.setEnabled(false);
+        if (thresholdSpinner != null) thresholdSpinner.setEnabled(false);
+        if (applyBinarizationBtn != null) applyBinarizationBtn.setEnabled(false);
     }
 
     public void onContrast() {
@@ -191,6 +215,7 @@ public class OptionPanel extends JPanel {
         gammaSlider.setMaximumSize(new Dimension(Integer.MAX_VALUE, gammaSlider.getPreferredSize().height));
 
         originalMatrix = photoPanel.getImageMatrix();
+        saveUndoState();
 
         gammaSlider.addChangeListener(e -> {
             double gammaValue = gammaSlider.getValue() / 10.0;
@@ -319,6 +344,115 @@ public class OptionPanel extends JPanel {
             }
         }
 
+        photoPanel.setImageMatrix(newMatrix);
+    }
+
+    public void onBinarization() {
+        this.removeAll();
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setBorder(BorderFactory.createEmptyBorder(30, 20, 0, 20));
+
+        isGrayscaleApplied = false;
+        originalMatrix = photoPanel.getImageMatrix();
+        saveUndoState();
+
+        JLabel titleLabel = new JLabel("Binarization:");
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        grayscaleBtn = new JButton("Convert to Grayscale");
+        grayscaleBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        spinnerLabel = new JLabel("Set your own threshold:");
+        spinnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        spinnerLabel.setEnabled(false);
+
+        thresholdSpinner = new JSpinner(new SpinnerNumberModel(128.0, 0.0, 255.0, 1.0));
+        thresholdSpinner.setMaximumSize(new Dimension(100, 30));
+        thresholdSpinner.setEnabled(false);
+
+        applyBinarizationBtn = new JButton("Apply Segmentation");
+        applyBinarizationBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        applyBinarizationBtn.setEnabled(false);
+
+        grayscaleBtn.addActionListener(e -> {
+            saveUndoState();
+            applyGrayscale();
+
+            spinnerLabel.setEnabled(true);
+            thresholdSpinner.setEnabled(true);
+            applyBinarizationBtn.setEnabled(true);
+        });
+
+        applyBinarizationBtn.addActionListener(e -> {
+            saveUndoState();
+            double t = (Double) thresholdSpinner.getValue();
+            applySegmentation(t);
+            originalMatrix = photoPanel.getImageMatrix();
+        });
+
+        this.add(titleLabel);
+        this.add(Box.createVerticalStrut(20));
+        this.add(grayscaleBtn);
+        this.add(Box.createVerticalStrut(30));
+        this.add(spinnerLabel);
+        this.add(Box.createVerticalStrut(10));
+        this.add(thresholdSpinner);
+        this.add(Box.createVerticalStrut(10));
+        this.add(applyBinarizationBtn);
+        this.add(Box.createVerticalGlue());
+
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void applyGrayscale() {
+        if (originalMatrix == null) return;
+        // weighted average
+        int[][][] imageMatrix = photoPanel.getImageMatrix();
+        int height = imageMatrix.length;
+        int width = imageMatrix[0].length;
+        int[][][] newImageMatrix = new int[height][width][3];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = imageMatrix[y][x][0];
+                int g = imageMatrix[y][x][1];
+                int b = imageMatrix[y][x][2];
+                int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+
+                newImageMatrix[y][x][0] = gray;
+                newImageMatrix[y][x][1] = gray;
+                newImageMatrix[y][x][2] = gray;
+            }
+        }
+
+        photoPanel.setImageMatrix(newImageMatrix);
+        originalMatrix = newImageMatrix;
+        isGrayscaleApplied = true;
+    }
+
+    public void applySegmentation(double t) {
+        if (originalMatrix == null || !isGrayscaleApplied) return;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                for (int c = 0; c < 3; c++) {
+
+                    int originalValue = originalMatrix[y][x][c];
+                    int newValue = 0;
+
+                    if (originalValue <= t) {
+                        newValue = 255;
+                    }
+
+                    newMatrix[y][x][c] = newValue;
+                }
+            }
+        }
         photoPanel.setImageMatrix(newMatrix);
     }
 

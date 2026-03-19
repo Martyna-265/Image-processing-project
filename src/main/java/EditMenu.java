@@ -16,18 +16,21 @@ public class EditMenu extends JMenu {
         JMenuItem negativeItem = new JMenuItem("Create a negative");
         JMenuItem brightnessItem = new JMenuItem("Change brightness");
         JMenuItem contrastItem = new JMenuItem("Change contrast");
+        JMenuItem binarizarionItem = new JMenuItem("Apply binarization");
 
         undoItem.addActionListener(e -> onUndo());
         grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
-        brightnessItem.addActionListener(e -> onBrightness());
-        contrastItem.addActionListener(e -> onContrast());
+        brightnessItem.addActionListener(e -> optionPanel.onBrightness());
+        contrastItem.addActionListener(e -> optionPanel.onContrast());
+        binarizarionItem.addActionListener(e -> optionPanel.onBinarization());
 
         this.add(undoItem);
         this.add(grayScaleItem);
         this.add(negativeItem);
         this.add(brightnessItem);
         this.add(contrastItem);
+        this.add(binarizarionItem);
     }
 
     private void onUndo() {
@@ -42,25 +45,8 @@ public class EditMenu extends JMenu {
     private void onGrayScale() {
         // weighted average
         int[][][] imageMatrix = photoPanel.getImageMatrix();
-        int height = imageMatrix.length;
-        int width = imageMatrix[0].length;
         lastImageMatrix = imageMatrix;
-        int[][][] newImageMatrix = new int[height][width][3];
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int r = imageMatrix[y][x][0];
-                int g = imageMatrix[y][x][1];
-                int b = imageMatrix[y][x][2];
-                int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
-
-                newImageMatrix[y][x][0] = gray;
-                newImageMatrix[y][x][1] = gray;
-                newImageMatrix[y][x][2] = gray;
-            }
-        }
-
-        photoPanel.setImageMatrix(newImageMatrix);
+        optionPanel.applyGrayscale();
         if (optionPanel != null) {
             optionPanel.refreshOnImport();
         }
@@ -85,14 +71,6 @@ public class EditMenu extends JMenu {
         if (optionPanel != null) {
             optionPanel.refreshOnImport();
         }
-    }
-
-    private void onBrightness() {
-        optionPanel.onBrightness();
-    }
-
-    private void onContrast() {
-        optionPanel.onContrast();
     }
 
     public void setLastImageMatrix(int[][][] newMatrix) {

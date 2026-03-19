@@ -19,6 +19,8 @@ public class MenuBar extends JMenuBar {
         JMenu displayMenu = setupDisplayMenu();
         editMenu = new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel);
 
+        optionPanel.setEditMenu(editMenu);
+
         add(fileMenu);
         add(displayMenu);
         add(editMenu);
