@@ -24,6 +24,7 @@ public class CustomMaskPanel extends JPanel {
     private void buildUI() {
         JLabel titleLabel = new JLabel("Custom Mask Filter:");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         JPanel sizePanel = new JPanel();
         sizePanel.setMaximumSize(new Dimension(300, 40));

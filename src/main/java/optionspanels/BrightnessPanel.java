@@ -27,6 +27,7 @@ public class BrightnessPanel extends JPanel {
     private void buildUI() {
         JLabel titleLabel = new JLabel("Change brightness:");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         brightnessSlider = new JSlider(JSlider.HORIZONTAL, -255, 255, 0);
         brightnessSlider.setMajorTickSpacing(85);

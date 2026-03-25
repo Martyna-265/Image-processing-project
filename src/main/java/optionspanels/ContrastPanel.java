@@ -26,6 +26,7 @@ public class ContrastPanel extends JPanel {
     private void buildUI() {
         JLabel titleLabel = new JLabel("Gamma correction:");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         JLabel valueLabel = new JLabel("Gamma factor: 1.0");
         valueLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

@@ -22,6 +22,7 @@ public class BlurringPanel extends JPanel {
     private void buildUI() {
         JLabel titleLabel = new JLabel("Blurring Filters:");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         JPanel typePanel = new JPanel();
         typePanel.setMaximumSize(new Dimension(300, 40));

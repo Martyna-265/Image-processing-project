@@ -323,4 +323,129 @@ public class ImageProcessor {
             };
         }
     }
+
+    private static int applySharpeningMath(int origVal, double response, double strength, int threshold) {
+        if (Math.abs(response) >= threshold) {
+            int finalVal = (int) Math.round(origVal + (strength * response));
+            return Math.min(Math.max(finalVal, 0), 255);
+        }
+        return origVal;
+    }
+
+    public static int[][][] applyAdvancedSharpening(
+            int[][][] originalMatrix,
+            String mode,
+            String laplacianType,
+            boolean useLoG,
+            double sigma,
+            double strength,
+            int threshold,
+            OptionPanel.BoundaryMode boundaryMode) {
+
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+
+        // generate blurred image for LoG or unsharp
+        int[][][] blurredMatrix = null;
+        int gaussOffset = 0;
+        if (mode.equals("Unsharp Masking") || (mode.equals("Laplacian") && useLoG)) {
+            double[][] gaussMask = getGaussianMask(sigma);
+            gaussOffset = gaussMask.length / 2;
+            blurredMatrix = applyConvolution(originalMatrix, gaussMask, boundaryMode);
+            if (blurredMatrix == null || blurredMatrix == originalMatrix) return originalMatrix;
+        }
+
+        // unsharp masking: output = original + strength * (original - blurred)
+        if (mode.equals("Unsharp Masking")) {
+            int outH = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? height - 2 * gaussOffset : height;
+            int outW = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? width - 2 * gaussOffset : width;
+            int[][][] newMatrix = new int[outH][outW][3];
+
+            for (int y = 0; y < outH; y++) {
+                for (int x = 0; x < outW; x++) {
+                    int origY = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? y + gaussOffset : y;
+                    int origX = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? x + gaussOffset : x;
+
+                    for (int c = 0; c < 3; c++) {
+                        int origVal = originalMatrix[origY][origX][c];
+                        int blurVal = blurredMatrix[y][x][c];
+                        double diff = origVal - blurVal;
+
+                        // check threshold
+                        if (Math.abs(diff) >= threshold) {
+                            int finalVal = (int) Math.round(origVal + strength * diff);
+                            newMatrix[y][x][c] = Math.min(Math.max(finalVal, 0), 255);
+                        } else {
+                            newMatrix[y][x][c] = origVal;
+                        }
+                    }
+                }
+            }
+            return newMatrix;
+        }
+
+        // laplacian masking: output = original + strength * (laplacian mask output)
+        if (mode.equals("Laplacian")) {
+            int[][][] baseMatrix = useLoG ? blurredMatrix : originalMatrix;
+            int baseH = baseMatrix.length;
+            int baseW = baseMatrix[0].length;
+            int lapOffset = 1;
+
+            double[][] lapMask = laplacianType.equals("Strong")
+                    ? new double[][] {{-1, -1, -1}, {-1, 8, -1}, {-1, -1, -1}}
+                    : new double[][] {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
+
+            int outH = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? baseH - 2 * lapOffset : baseH;
+            int outW = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? baseW - 2 * lapOffset : baseW;
+            if (outH <= 0 || outW <= 0) return originalMatrix;
+
+            int[][][] newMatrix = new int[outH][outW][3];
+
+            for (int y = 0; y < outH; y++) {
+                for (int x = 0; x < outW; x++) {
+                    int baseY = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? y + lapOffset : y;
+                    int baseX = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? x + lapOffset : x;
+
+                    int origY = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? baseY + gaussOffset : y;
+                    int origX = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? baseX + gaussOffset : x;
+
+                    if (boundaryMode == OptionPanel.BoundaryMode.KEEP_ORIGINAL) {
+                        int totalOffset = lapOffset + gaussOffset;
+                        if (origY < totalOffset || origY >= height - totalOffset || origX < totalOffset || origX >= width - totalOffset) {
+                            newMatrix[y][x][0] = originalMatrix[origY][origX][0];
+                            newMatrix[y][x][1] = originalMatrix[origY][origX][1];
+                            newMatrix[y][x][2] = originalMatrix[origY][origX][2];
+                            continue;
+                        }
+                    }
+
+                    double rLap = 0, gLap = 0, bLap = 0;
+
+                    // regular laplacian mask output
+                    for (int my = 0; my < 3; my++) {
+                        for (int mx = 0; mx < 3; mx++) {
+                            int pixelY = baseY + my - lapOffset;
+                            int pixelX = baseX + mx - lapOffset;
+                            double weight = lapMask[my][mx];
+
+                            int[] rgb = getPixelWithBoundary(baseMatrix, pixelX, pixelY, baseW, baseH, boundaryMode);
+                            rLap += rgb[0] * weight;
+                            gLap += rgb[1] * weight;
+                            bLap += rgb[2] * weight;
+                        }
+                    }
+
+                    int[] origRgb = originalMatrix[origY][origX];
+                    newMatrix[y][x][0] = applySharpeningMath(origRgb[0], rLap, strength, threshold);
+                    newMatrix[y][x][1] = applySharpeningMath(origRgb[1], gLap, strength, threshold);
+                    newMatrix[y][x][2] = applySharpeningMath(origRgb[2], bLap, strength, threshold);
+                }
+            }
+            return newMatrix;
+        }
+
+        return originalMatrix;
+    }
 }

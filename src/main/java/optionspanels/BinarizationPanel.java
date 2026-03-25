@@ -27,6 +27,7 @@ public class BinarizationPanel extends JPanel {
     private void buildUI() {
         JLabel titleLabel = new JLabel("Binarization:");
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         JButton grayscaleBtn = new JButton("Convert to Grayscale");
         grayscaleBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
