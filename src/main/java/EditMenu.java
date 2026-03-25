@@ -12,25 +12,42 @@ public class EditMenu extends JMenu {
         this.optionPanel = optionPanel;
 
         JMenuItem undoItem = new JMenuItem("Undo");
+
+        JMenu pixelOperationsMenu = new JMenu("Pixel operations");
         JMenuItem grayScaleItem = new JMenuItem("Convert to gray scale");
         JMenuItem negativeItem = new JMenuItem("Create a negative");
         JMenuItem brightnessItem = new JMenuItem("Change brightness");
         JMenuItem contrastItem = new JMenuItem("Change contrast");
-        JMenuItem binarizarionItem = new JMenuItem("Apply binarization");
+        JMenuItem binarizationItem = new JMenuItem("Apply binarization");
+
+        pixelOperationsMenu.add(grayScaleItem);
+        pixelOperationsMenu.add(negativeItem);
+        pixelOperationsMenu.add(brightnessItem);
+        pixelOperationsMenu.add(contrastItem);
+        pixelOperationsMenu.add(binarizationItem);
+
+        JMenu graphicFiltersMenu = new JMenu("Graphic filters");
+        JMenuItem blurringItem = new JMenuItem("Blurring");
+        JMenuItem sharpeningItem = new JMenuItem("Sharpening");
+        JMenuItem customMaskItem = new JMenuItem("Custom Mask");
+
+        graphicFiltersMenu.add(blurringItem);
+        graphicFiltersMenu.add(sharpeningItem);
+        graphicFiltersMenu.add(customMaskItem);
 
         undoItem.addActionListener(e -> onUndo());
         grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
         brightnessItem.addActionListener(e -> optionPanel.onBrightness());
         contrastItem.addActionListener(e -> optionPanel.onContrast());
-        binarizarionItem.addActionListener(e -> optionPanel.onBinarization());
+        binarizationItem.addActionListener(e -> optionPanel.onBinarization());
+        blurringItem.addActionListener(e -> optionPanel.onBlurring());
+        sharpeningItem.addActionListener(e -> optionPanel.onSharpening());
+        customMaskItem.addActionListener(e -> optionPanel.onCustomMask());
 
         this.add(undoItem);
-        this.add(grayScaleItem);
-        this.add(negativeItem);
-        this.add(brightnessItem);
-        this.add(contrastItem);
-        this.add(binarizarionItem);
+        this.add(pixelOperationsMenu);
+        this.add(graphicFiltersMenu);
     }
 
     private void onUndo() {

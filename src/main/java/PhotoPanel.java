@@ -114,6 +114,11 @@ public class PhotoPanel extends JPanel {
         int height = imageMatrix.length;
         int width = imageMatrix[0].length;
 
+        if (image.getWidth() != width || image.getHeight() != height) {
+            image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            maxDimension = new Dimension(getWidth() - 200, getHeight() - 50); // Force a rescale
+        }
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int r = imageMatrix[y][x][0];

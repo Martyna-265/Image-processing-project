@@ -18,12 +18,14 @@ public class MenuBar extends JMenuBar {
         JMenu fileMenu = setupFileMenu();
         JMenu displayMenu = setupDisplayMenu();
         editMenu = new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel);
+        JMenu settingsMenu = setupSettingsMenu(optionPanel);
 
         optionPanel.setEditMenu(editMenu);
 
         add(fileMenu);
         add(displayMenu);
         add(editMenu);
+        add(settingsMenu);
     }
 
     private JMenu setupFileMenu(){
@@ -71,6 +73,44 @@ public class MenuBar extends JMenuBar {
 
     private void onSave() {
         System.out.println("Save clicked");
+    }
+
+    private JMenu setupSettingsMenu(OptionPanel optionPanel) {
+        JMenu settingsMenu = new JMenu("Settings");
+        JMenu convMenu = new JMenu("Convolution filter options");
+
+        ButtonGroup group = new ButtonGroup();
+
+        JRadioButtonMenuItem cropItem = new JRadioButtonMenuItem("Crop the image");
+        JRadioButtonMenuItem keepItem = new JRadioButtonMenuItem("Copy original pixels");
+        JRadioButtonMenuItem blackItem = new JRadioButtonMenuItem("Assume outside is black");
+        JRadioButtonMenuItem whiteItem = new JRadioButtonMenuItem("Assume outside is white");
+        JRadioButtonMenuItem grayItem = new JRadioButtonMenuItem("Assume outside is gray");
+        JRadioButtonMenuItem copyItem = new JRadioButtonMenuItem("Copy outer-most pixel");
+        JRadioButtonMenuItem mirrorItem = new JRadioButtonMenuItem("Mirror pixels");
+
+        // set default
+        copyItem.setSelected(true);
+
+        cropItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.CROP));
+        keepItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.KEEP_ORIGINAL));
+        blackItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.PAD_BLACK));
+        whiteItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.PAD_WHITE));
+        grayItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.PAD_GRAY));
+        copyItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.REPLICATE));
+        mirrorItem.addActionListener(e -> optionPanel.setBoundaryMode(OptionPanel.BoundaryMode.MIRROR));
+
+        group.add(cropItem); group.add(keepItem); group.add(blackItem);
+        group.add(whiteItem); group.add(grayItem); group.add(copyItem); group.add(mirrorItem);
+
+        convMenu.add(cropItem); convMenu.add(keepItem);
+        convMenu.addSeparator();
+        convMenu.add(blackItem); convMenu.add(whiteItem); convMenu.add(grayItem);
+        convMenu.addSeparator();
+        convMenu.add(copyItem); convMenu.add(mirrorItem);
+
+        settingsMenu.add(convMenu);
+        return settingsMenu;
     }
 
 }
