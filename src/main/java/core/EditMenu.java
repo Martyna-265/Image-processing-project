@@ -35,10 +35,12 @@ public class EditMenu extends JMenu {
         JMenu graphicFiltersMenu = new JMenu("Graphic filters");
         JMenuItem blurringItem = new JMenuItem("Blurring");
         JMenuItem sharpeningItem = new JMenuItem("Sharpening");
+        JMenuItem edgeDetectionItem = new JMenuItem("Edge Detection");
         JMenuItem customMaskItem = new JMenuItem("Custom Mask");
 
         graphicFiltersMenu.add(blurringItem);
         graphicFiltersMenu.add(sharpeningItem);
+        graphicFiltersMenu.add(edgeDetectionItem);
         graphicFiltersMenu.add(customMaskItem);
 
         // instant actions
@@ -51,6 +53,7 @@ public class EditMenu extends JMenu {
         binarizationItem.addActionListener(e -> optionPanel.loadToolPanel(new BinarizationPanel(photoPanel, optionPanel)));
         blurringItem.addActionListener(e -> optionPanel.loadToolPanel(new BlurringPanel(photoPanel, optionPanel)));
         sharpeningItem.addActionListener(e -> optionPanel.loadToolPanel(new SharpeningPanel(photoPanel, optionPanel)));
+        edgeDetectionItem.addActionListener(e -> optionPanel.loadToolPanel(new EdgeDetectionPanel(photoPanel, optionPanel)));
         customMaskItem.addActionListener(e -> optionPanel.loadToolPanel(new CustomMaskPanel(photoPanel, optionPanel)));
 
         this.add(undoItem);

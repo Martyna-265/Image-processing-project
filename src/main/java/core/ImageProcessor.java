@@ -186,6 +186,31 @@ public class ImageProcessor {
     // CONVOLUTION FILTERS
     // ==========================================================
 
+    private static double[] applyMaskToPixel(int[][][] matrix, int centerX, int centerY, double[][] mask, OptionPanel.BoundaryMode mode) {
+        int maskSize = mask.length;
+        int offset = maskSize / 2;
+        int height = matrix.length;
+        int width = matrix[0].length;
+
+        double r = 0, g = 0, b = 0;
+
+        for (int my = 0; my < maskSize; my++) {
+            for (int mx = 0; mx < maskSize; mx++) {
+                int pixelY = centerY + my - offset;
+                int pixelX = centerX + mx - offset;
+
+                int[] rgb = getPixelWithBoundary(matrix, pixelX, pixelY, width, height, mode);
+                double weight = mask[my][mx];
+
+                r += rgb[0] * weight;
+                g += rgb[1] * weight;
+                b += rgb[2] * weight;
+            }
+        }
+
+        return new double[]{r, g, b};
+    }
+
     public static int[][][] applyConvolution(int[][][] originalMatrix, double[][] mask, OptionPanel.BoundaryMode currentBoundaryMode) {
         if (originalMatrix == null || mask == null) return null;
 
@@ -224,25 +249,11 @@ public class ImageProcessor {
                     }
                 }
 
-                double r = 0, g = 0, b = 0;
+                double[] rgbResult = applyMaskToPixel(originalMatrix, origX, origY, mask, currentBoundaryMode);
 
-                for (int my = 0; my < maskSize; my++) {
-                    for (int mx = 0; mx < maskSize; mx++) {
-                        int pixelY = origY + my - offset;
-                        int pixelX = origX + mx - offset;
-                        double weight = mask[my][mx];
-
-                        int[] rgb = getPixelWithBoundary(originalMatrix, pixelX, pixelY, width, height, currentBoundaryMode);
-
-                        r += rgb[0] * weight;
-                        g += rgb[1] * weight;
-                        b += rgb[2] * weight;
-                    }
-                }
-
-                newMatrix[y][x][0] = Math.min(Math.max((int)(r / weightSum), 0), 255);
-                newMatrix[y][x][1] = Math.min(Math.max((int)(g / weightSum), 0), 255);
-                newMatrix[y][x][2] = Math.min(Math.max((int)(b / weightSum), 0), 255);
+                newMatrix[y][x][0] = Math.min(Math.max((int) Math.round(rgbResult[0] / weightSum), 0), 255);
+                newMatrix[y][x][1] = Math.min(Math.max((int) Math.round(rgbResult[1] / weightSum), 0), 255);
+                newMatrix[y][x][2] = Math.min(Math.max((int) Math.round(rgbResult[2] / weightSum), 0), 255);
             }
         }
 
@@ -447,5 +458,114 @@ public class ImageProcessor {
         }
 
         return originalMatrix;
+    }
+
+    // ==========================================================
+    // EDGE DETECTION
+    // ==========================================================
+
+    public static int[][][] applyEdgeDetection(int[][][] originalMatrix, String operator, OptionPanel.BoundaryMode boundaryMode) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int offset = 1;
+
+        double[][][] masks;
+
+        if (operator.equals("Roberts Cross")) {
+            masks = new double[][][] {
+                    { {0, 0, 0}, {0, 1, 0}, {0, 0, -1} },
+                    { {0, 0, 0}, {0, 0, 1}, {0, -1, 0} }
+            };
+        } else if (operator.equals("Laplace")) {
+            masks = new double[][][] {
+                    { {0,  -1, 0}, { -1, 4,  -1}, {0,  -1, 0} }
+            };
+        } else if (operator.equals("Prewitt Compass")) {
+            masks = new double[][][] {
+                    { {-1, 0, 1}, {-1, 0, 1}, {-1, 0, 1} },
+                    { { 0, 1, 1}, {-1, 0, 1}, {-1,-1, 0} },
+                    { { 1, 1, 1}, { 0, 0, 0}, {-1,-1,-1} },
+                    { { 1, 1, 0}, { 1, 0,-1}, { 0,-1,-1} },
+                    { { 1, 0,-1}, { 1, 0,-1}, { 1, 0,-1} },
+                    { { 0,-1,-1}, { 1, 0,-1}, { 1, 1, 0} },
+                    { {-1,-1,-1}, { 0, 0, 0}, { 1, 1, 1} },
+                    { {-1,-1, 0}, {-1, 0, 1}, { 0, 1, 1} }
+            };
+        } else if (operator.equals("Sobel Compass")) {
+            masks = new double[][][] {
+                    { {-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1} },
+                    { { 0, 1, 2}, {-1, 0, 1}, {-2,-1, 0} },
+                    { { 1, 2, 1}, { 0, 0, 0}, {-1,-2,-1} },
+                    { { 2, 1, 0}, { 1, 0,-1}, { 0,-1,-2} },
+                    { { 1, 0,-1}, { 2, 0,-2}, { 1, 0,-1} },
+                    { { 0,-1,-2}, { 1, 0,-1}, { 2, 1, 0} },
+                    { {-1,-2,-1}, { 0, 0, 0}, { 1, 2, 1} },
+                    { {-2,-1, 0}, {-1, 0, 1}, { 0, 1, 2} }
+            };
+        } else {
+            // Sobel (default)
+            masks = new double[][][] {
+                    { {-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1} },
+                    { {-1, -2, -1}, { 0, 0, 0}, { 1, 2, 1} }
+            };
+        }
+
+        int outHeight = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? height - 2 * offset : height;
+        int outWidth = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? width - 2 * offset : width;
+        if (outHeight <= 0 || outWidth <= 0) return originalMatrix;
+
+        int[][][] newMatrix = new int[outHeight][outWidth][3];
+
+        for (int y = 0; y < outHeight; y++) {
+            for (int x = 0; x < outWidth; x++) {
+
+                int origY = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? y + offset : y;
+                int origX = (boundaryMode == OptionPanel.BoundaryMode.CROP) ? x + offset : x;
+
+                if (boundaryMode == OptionPanel.BoundaryMode.KEEP_ORIGINAL) {
+                    if (origY < offset || origY >= height - offset || origX < offset || origX >= width - offset) {
+                        newMatrix[y][x][0] = originalMatrix[origY][origX][0];
+                        newMatrix[y][x][1] = originalMatrix[origY][origX][1];
+                        newMatrix[y][x][2] = originalMatrix[origY][origX][2];
+                        continue;
+                    }
+                }
+
+                double finalR = 0, finalG = 0, finalB = 0;
+
+                if (masks.length == 1) {
+                    // just result, no changes, no abs()
+                    double[] res = applyMaskToPixel(originalMatrix, origX, origY, masks[0], boundaryMode);
+                    finalR = res[0];
+                    finalG = res[1];
+                    finalB = res[2];
+
+                } else if (masks.length == 2) {
+                    // sqrt of sum of squares of mask results
+                    double[] resX = applyMaskToPixel(originalMatrix, origX, origY, masks[0], boundaryMode);
+                    double[] resY = applyMaskToPixel(originalMatrix, origX, origY, masks[1], boundaryMode);
+                    finalR = Math.sqrt(resX[0] * resX[0] + resY[0] * resY[0]);
+                    finalG = Math.sqrt(resX[1] * resX[1] + resY[1] * resY[1]);
+                    finalB = Math.sqrt(resX[2] * resX[2] + resY[2] * resY[2]);
+
+                } else {
+                    // maximum absolute response among all masks
+                    for (double[][] mask : masks) {
+                        double[] res = applyMaskToPixel(originalMatrix, origX, origY, mask, boundaryMode);
+                        finalR = Math.max(finalR, Math.abs(res[0]));
+                        finalG = Math.max(finalG, Math.abs(res[1]));
+                        finalB = Math.max(finalB, Math.abs(res[2]));
+                    }
+                }
+
+                newMatrix[y][x][0] = Math.min(Math.max((int) Math.round(finalR), 0), 255);
+                newMatrix[y][x][1] = Math.min(Math.max((int) Math.round(finalG), 0), 255);
+                newMatrix[y][x][2] = Math.min(Math.max((int) Math.round(finalB), 0), 255);
+            }
+        }
+
+        return newMatrix;
     }
 }
