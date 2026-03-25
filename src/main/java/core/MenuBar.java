@@ -3,6 +3,8 @@ package core;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
 public class MenuBar extends JMenuBar {
     private PhotoPanel photoPanel;
@@ -10,6 +12,7 @@ public class MenuBar extends JMenuBar {
     private JFrame frame;
     private OptionPanel optionPanel;
     private EditMenu editMenu;
+    private String currentFilename = "untitled_image";
 
     public MenuBar(JFrame frame, PhotoPanel photoPanel, OptionPanel optionPanel) {
         this.photoPanel = photoPanel;
@@ -65,6 +68,14 @@ public class MenuBar extends JMenuBar {
             File selectedFile = fc.getSelectedFile();
             String filepath = selectedFile.getAbsolutePath();
             String filename = selectedFile.getName();
+
+            int dotIndex = filename.lastIndexOf('.');
+            if (dotIndex > 0) {
+                currentFilename = filename.substring(0, dotIndex) + "_edited";
+            } else {
+                currentFilename = filename + "_edited";
+            }
+
             photoPanel.changeImage(filepath);
             frame.setTitle(filename);
             lastImageMatrix = photoPanel.getImageMatrix();
@@ -74,7 +85,66 @@ public class MenuBar extends JMenuBar {
     }
 
     private void onSave() {
-        System.out.println("Save clicked");
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Save Image");
+
+        // filetype filters
+        FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG Image (*.png)", "png");
+        FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("JPEG Image (*.jpg; *.jpeg)", "jpg", "jpeg");
+        FileNameExtensionFilter bmpFilter = new FileNameExtensionFilter("BMP Image (*.bmp)", "bmp");
+
+        fc.addChoosableFileFilter(pngFilter);
+        fc.addChoosableFileFilter(jpgFilter);
+        fc.addChoosableFileFilter(bmpFilter);
+
+        // png as default
+        fc.setFileFilter(pngFilter);
+        fc.setAcceptAllFileFilterUsed(false);
+
+        fc.setSelectedFile(new File(currentFilename));
+
+        int result = fc.showSaveDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fc.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+
+            javax.swing.filechooser.FileFilter selectedFilter = fc.getFileFilter();
+            String format = "png";
+            if (selectedFilter == jpgFilter) {
+                format = "jpg";
+            } else if (selectedFilter == bmpFilter) {
+                format = "bmp";
+            }
+
+            // add file extension
+            if (!filePath.toLowerCase().endsWith("." + format)) {
+                fileToSave = new File(filePath + "." + format);
+            }
+
+            try {
+                java.awt.image.BufferedImage imageToSave = photoPanel.getBufferedImage();
+
+                if (imageToSave != null) {
+                    ImageIO.write(imageToSave, format, fileToSave);
+                    JOptionPane.showMessageDialog(frame,
+                            "Image saved successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "There is no image to save.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame,
+                        "Error saving image: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        }
     }
 
     private JMenu setupSettingsMenu(OptionPanel optionPanel) {

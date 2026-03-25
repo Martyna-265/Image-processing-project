@@ -133,4 +133,8 @@ public class PhotoPanel extends JPanel {
         }
         repaint();
     }
+
+    public BufferedImage getBufferedImage() {
+        return this.image;
+    }
 }
