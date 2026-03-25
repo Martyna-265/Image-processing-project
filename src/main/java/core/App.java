@@ -40,9 +40,6 @@ public class App {
 
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setResizable(false);
-
         });
-
-
     }
 }

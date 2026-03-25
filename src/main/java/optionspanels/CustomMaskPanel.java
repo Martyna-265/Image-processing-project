@@ -40,7 +40,6 @@ public class CustomMaskPanel extends JPanel {
             int size = (int) sizeSpinner.getValue();
             JPanel gridPanel = new JPanel(new GridLayout(size, size, 2, 2));
 
-            // Dynamic resizing logic for the parent OptionsPanels.OptionPanel
             int requiredGridWidth = size * 50;
             int requiredPanelWidth = Math.max(400, requiredGridWidth + 60);
             parentPanel.setPreferredSize(new Dimension(requiredPanelWidth, 0));

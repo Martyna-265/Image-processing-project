@@ -17,7 +17,7 @@ public class EditMenu extends JMenu {
 
         JMenuItem undoItem = new JMenuItem("Undo");
 
-        // --- PIXEL OPERATIONS MENU ---
+        // pixel operations menu
         JMenu pixelOperationsMenu = new JMenu("Pixel operations");
         JMenuItem grayScaleItem = new JMenuItem("Convert to gray scale");
         JMenuItem negativeItem = new JMenuItem("Create a negative");
@@ -31,7 +31,7 @@ public class EditMenu extends JMenu {
         pixelOperationsMenu.add(contrastItem);
         pixelOperationsMenu.add(binarizationItem);
 
-        // --- GRAPHIC FILTERS MENU ---
+        // graphic filters menu
         JMenu graphicFiltersMenu = new JMenu("Graphic filters");
         JMenuItem blurringItem = new JMenuItem("Blurring");
         JMenuItem sharpeningItem = new JMenuItem("Sharpening");
@@ -41,22 +41,18 @@ public class EditMenu extends JMenu {
         graphicFiltersMenu.add(sharpeningItem);
         graphicFiltersMenu.add(customMaskItem);
 
-        // --- INSTANT ACTIONS ---
+        // instant actions
         undoItem.addActionListener(e -> onUndo());
         grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
 
-        // --- TOOL PANEL ROUTING ---
-        // Notice how we just instantiate the specific panel and hand it to OptionsPanels.OptionPanel!
         brightnessItem.addActionListener(e -> optionPanel.loadToolPanel(new BrightnessPanel(photoPanel, optionPanel)));
         contrastItem.addActionListener(e -> optionPanel.loadToolPanel(new ContrastPanel(photoPanel, optionPanel)));
         binarizationItem.addActionListener(e -> optionPanel.loadToolPanel(new BinarizationPanel(photoPanel, optionPanel)));
-
         blurringItem.addActionListener(e -> optionPanel.loadToolPanel(new BlurringPanel(photoPanel, optionPanel)));
         sharpeningItem.addActionListener(e -> optionPanel.loadToolPanel(new SharpeningPanel(photoPanel, optionPanel)));
         customMaskItem.addActionListener(e -> optionPanel.loadToolPanel(new CustomMaskPanel(photoPanel, optionPanel)));
 
-        // --- ADD MENUS TO PARENT ---
         this.add(undoItem);
         this.add(pixelOperationsMenu);
         this.add(graphicFiltersMenu);
@@ -70,14 +66,12 @@ public class EditMenu extends JMenu {
 
     private void onGrayScale() {
         lastImageMatrix = photoPanel.getImageMatrix();
-        // Delegate the math to our new core.ImageProcessor class
         int[][][] newMatrix = ImageProcessor.applyGrayscale(lastImageMatrix);
         photoPanel.setImageMatrix(newMatrix);
     }
 
     private void onNegative() {
         lastImageMatrix = photoPanel.getImageMatrix();
-        // Delegate the math to our new core.ImageProcessor class
         int[][][] newMatrix = ImageProcessor.applyNegative(lastImageMatrix);
         photoPanel.setImageMatrix(newMatrix);
     }

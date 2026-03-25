@@ -1,7 +1,5 @@
 package core;
 
-import optionspanels.*;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -50,13 +48,11 @@ public class OptionPanel extends JPanel {
     public void loadToolPanel(JPanel toolPanel) {
         this.removeAll();
 
-        // Always reset width to 400 in case UIPanels.CustomMaskPanel previously expanded it
+        // always reset width to 400
         this.setPreferredSize(new Dimension(400, 0));
 
-        // Add the new tool panel to the center
         this.add(toolPanel, BorderLayout.CENTER);
 
-        // Force the app window to visually acknowledge the size reset
         Window window = SwingUtilities.getWindowAncestor(this);
         if (window != null) {
             window.revalidate();

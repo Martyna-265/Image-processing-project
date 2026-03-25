@@ -1,7 +1,5 @@
 package core;
 
-import optionspanels.*;
-
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -120,7 +118,7 @@ public class PhotoPanel extends JPanel {
 
         if (image.getWidth() != width || image.getHeight() != height) {
             image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            maxDimension = new Dimension(getWidth() - 200, getHeight() - 50); // Force a rescale
+            maxDimension = new Dimension(getWidth() - 200, getHeight() - 50);
         }
 
         for (int y = 0; y < height; y++) {
@@ -133,8 +131,6 @@ public class PhotoPanel extends JPanel {
                 image.setRGB(x, y, rgb);
             }
         }
-
         repaint();
     }
-
 }

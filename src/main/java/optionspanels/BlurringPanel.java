@@ -34,7 +34,7 @@ public class BlurringPanel extends JPanel {
         JPanel cardsPanel = new JPanel(new CardLayout());
         cardsPanel.setMaximumSize(new Dimension(300, 80));
 
-        // Box Blur Panel
+        // box blur panel
         JPanel boxPanel = new JPanel(new GridLayout(2, 2, 5, 5));
         JSpinner sizeSpinner = new JSpinner(new SpinnerNumberModel(3, 3, 21, 2));
         JSpinner weightSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
@@ -43,7 +43,7 @@ public class BlurringPanel extends JPanel {
         boxPanel.add(new JLabel("Center Weight: "));
         boxPanel.add(weightSpinner);
 
-        // Gaussian Blur Panel
+        // gaussian blur panel
         JPanel gaussianPanel = new JPanel();
         JSpinner sigmaSpinner = new JSpinner(new SpinnerNumberModel(1.4, 0.1, 10.0, 0.1));
         gaussianPanel.add(new JLabel("Sigma (\u03C3): "));
