@@ -568,4 +568,131 @@ public class ImageProcessor {
 
         return newMatrix;
     }
+
+    public static int[][][] applyCannyEdgeDetection(int[][][] originalMatrix, double sigma, int lowThresh, int highThresh, OptionPanel.BoundaryMode boundaryMode) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+
+        // 1. gaussian blur & greyscale
+        int[][][] grayMatrix = applyGrayscale(originalMatrix);
+        double[][] gaussMask = getGaussianMask(sigma);
+        int[][][] blurredMatrix = applyConvolution(grayMatrix, gaussMask, boundaryMode);
+
+        // 2. 2-direction sobel
+        double[][] sobelX = { {-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1} };
+        double[][] sobelY = { {-1, -2, -1}, { 0, 0, 0}, { 1, 2, 1} };
+
+        double[][] magnitude = new double[height][width];
+        int[][] angle = new int[height][width];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // image is greyscale so we can only work on 1 channel
+                double resX = applyMaskToPixel(blurredMatrix, x, y, sobelX, boundaryMode)[0];
+                double resY = applyMaskToPixel(blurredMatrix, x, y, sobelY, boundaryMode)[0];
+
+                magnitude[y][x] = Math.sqrt(resX * resX + resY * resY);
+
+                double theta = Math.toDegrees(Math.atan2(resY, resX));
+                if (theta < 0) theta += 180;
+
+                // limit to 0, 45, 90, 135
+                if ((theta >= 0 && theta < 22.5) || (theta >= 157.5 && theta <= 180)) {
+                    angle[y][x] = 0; // horizontal (-)
+                } else if (theta >= 22.5 && theta < 67.5) {
+                    angle[y][x] = 45;  // diagonal (/)
+                } else if (theta >= 67.5 && theta < 112.5) {
+                    angle[y][x] = 90;  // vertical (|)
+                } else if (theta >= 112.5 && theta < 157.5) {
+                    angle[y][x] = 135; // diagonal (\)
+                }
+            }
+        }
+
+        // 3. non-maximum suppression
+        double[][] nms = new double[height][width];
+
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+                double q = 255, r = 255; // default: neighbors have edge
+
+                switch (angle[y][x]) {
+                    case 0:
+                        q = magnitude[y][x + 1];
+                        r = magnitude[y][x - 1];
+                        break;
+                    case 45:
+                        q = magnitude[y + 1][x - 1];
+                        r = magnitude[y - 1][x + 1];
+                        break;
+                    case 90:
+                        q = magnitude[y + 1][x];
+                        r = magnitude[y - 1][x];
+                        break;
+                    case 135:
+                        q = magnitude[y - 1][x - 1];
+                        r = magnitude[y + 1][x + 1];
+                        break;
+                }
+
+                // keep current pixel only if stronger than both neighbors q and r
+                if (magnitude[y][x] >= q && magnitude[y][x] >= r) {
+                    nms[y][x] = magnitude[y][x];
+                } else {
+                    nms[y][x] = 0;
+                }
+            }
+        }
+
+        // 4. double thresholding
+        int[][] edges = new int[height][width]; // 0 = non-edge, 1 = weak, 2 = strong
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (nms[y][x] >= highThresh) {
+                    edges[y][x] = 2;
+                } else if (nms[y][x] >= lowThresh) {
+                    edges[y][x] = 1;
+                } else {
+                    edges[y][x] = 0;
+                }
+            }
+        }
+
+        // 5. edge tracking
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (int y = 1; y < height - 1; y++) {
+                for (int x = 1; x < width - 1; x++) {
+                    if (edges[y][x] == 1) {
+                        if (edges[y+1][x] == 2 || edges[y-1][x] == 2 ||
+                                edges[y][x+1] == 2 || edges[y][x-1] == 2 ||
+                                edges[y+1][x+1] == 2 || edges[y-1][x-1] == 2 ||
+                                edges[y-1][x+1] == 2 || edges[y+1][x-1] == 2) {
+
+                            edges[y][x] = 2;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 6. convert edge matrix back into rgb
+        int[][][] finalMatrix = new int[height][width][3];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // strong edges become white, all rest is black
+                int color = (edges[y][x] == 2) ? 255 : 0;
+                finalMatrix[y][x][0] = color;
+                finalMatrix[y][x][1] = color;
+                finalMatrix[y][x][2] = color;
+            }
+        }
+
+        return finalMatrix;
+    }
 }
