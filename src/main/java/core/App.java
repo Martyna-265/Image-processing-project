@@ -1,3 +1,5 @@
+package core;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 import javax.swing.*;
 import java.awt.*;

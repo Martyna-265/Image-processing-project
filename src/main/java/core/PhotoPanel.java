@@ -1,3 +1,7 @@
+package core;
+
+import optionspanels.*;
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
