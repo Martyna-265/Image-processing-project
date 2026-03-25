@@ -602,11 +602,11 @@ public class ImageProcessor {
                 if ((theta >= 0 && theta < 22.5) || (theta >= 157.5 && theta <= 180)) {
                     angle[y][x] = 0; // horizontal (-)
                 } else if (theta >= 22.5 && theta < 67.5) {
-                    angle[y][x] = 45;  // diagonal (/)
+                    angle[y][x] = 45;  // diagonal (\)
                 } else if (theta >= 67.5 && theta < 112.5) {
                     angle[y][x] = 90;  // vertical (|)
                 } else if (theta >= 112.5 && theta < 157.5) {
-                    angle[y][x] = 135; // diagonal (\)
+                    angle[y][x] = 135; // diagonal (/)
                 }
             }
         }
@@ -624,16 +624,16 @@ public class ImageProcessor {
                         r = magnitude[y][x - 1];
                         break;
                     case 45:
-                        q = magnitude[y + 1][x - 1];
-                        r = magnitude[y - 1][x + 1];
+                        q = magnitude[y + 1][x + 1];
+                        r = magnitude[y - 1][x - 1];
                         break;
                     case 90:
                         q = magnitude[y + 1][x];
                         r = magnitude[y - 1][x];
                         break;
                     case 135:
-                        q = magnitude[y - 1][x - 1];
-                        r = magnitude[y + 1][x + 1];
+                        q = magnitude[y + 1][x - 1];
+                        r = magnitude[y - 1][x + 1];
                         break;
                 }
 
