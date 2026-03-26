@@ -3,19 +3,24 @@ package core;
 import optionspanels.*;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
 
 public class EditMenu extends JMenu {
     private PhotoPanel photoPanel;
+    private int[][][] originalImageMatrix;
     private int[][][] lastImageMatrix;
     private OptionPanel optionPanel;
 
-    public EditMenu(String s, PhotoPanel photoPanel, int[][][] lastImageMatrix, OptionPanel optionPanel) {
+    public EditMenu(String s, PhotoPanel photoPanel, int[][][] lastImageMatrix, OptionPanel optionPanel, int[][][] originalImageMatrix) {
         super(s);
         this.photoPanel = photoPanel;
         this.lastImageMatrix = lastImageMatrix;
         this.optionPanel = optionPanel;
+        this.originalImageMatrix = originalImageMatrix;
 
         JMenuItem undoItem = new JMenuItem("Undo");
+        undoItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK));
+        JMenuItem revertItem = new JMenuItem("Revert to original state");
 
         // pixel operations menu
         JMenu pixelOperationsMenu = new JMenu("Pixel operations");
@@ -45,6 +50,7 @@ public class EditMenu extends JMenu {
 
         // instant actions
         undoItem.addActionListener(e -> onUndo());
+        revertItem.addActionListener(e -> onRevert());
         grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
 
@@ -57,6 +63,7 @@ public class EditMenu extends JMenu {
         customMaskItem.addActionListener(e -> optionPanel.loadToolPanel(new CustomMaskPanel(photoPanel, optionPanel)));
 
         this.add(undoItem);
+        this.add(revertItem);
         this.add(pixelOperationsMenu);
         this.add(graphicFiltersMenu);
     }
@@ -64,6 +71,12 @@ public class EditMenu extends JMenu {
     private void onUndo() {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(lastImageMatrix);
+        lastImageMatrix = temp;
+    }
+
+    private void onRevert() {
+        int[][][] temp = photoPanel.getImageMatrix();
+        photoPanel.setImageMatrix(originalImageMatrix);
         lastImageMatrix = temp;
     }
 
@@ -81,5 +94,9 @@ public class EditMenu extends JMenu {
 
     public void setLastImageMatrix(int[][][] newMatrix) {
         this.lastImageMatrix = newMatrix;
+    }
+
+    public void setOriginalImageMatrix(int[][][] newMatrix) {
+        this.originalImageMatrix = newMatrix;
     }
 }

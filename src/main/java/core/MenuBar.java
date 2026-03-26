@@ -2,6 +2,7 @@ package core;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.IOException;
 public class MenuBar extends JMenuBar {
     private PhotoPanel photoPanel;
     private int[][][] lastImageMatrix;
+    private int[][][] originalImageMatrix;
     private JFrame frame;
     private OptionPanel optionPanel;
     private EditMenu editMenu;
@@ -18,11 +20,12 @@ public class MenuBar extends JMenuBar {
         this.photoPanel = photoPanel;
         this.frame = frame;
         this.lastImageMatrix = photoPanel.getImageMatrix();
+        this.originalImageMatrix = photoPanel.getImageMatrix();
         this.optionPanel = optionPanel;
 
         JMenu fileMenu = setupFileMenu();
         JMenu displayMenu = setupDisplayMenu();
-        editMenu = new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel);
+        editMenu = new EditMenu("Edit", photoPanel, lastImageMatrix, optionPanel, originalImageMatrix);
         JMenu settingsMenu = setupSettingsMenu(optionPanel);
 
         optionPanel.setEditMenu(editMenu);
@@ -37,7 +40,9 @@ public class MenuBar extends JMenuBar {
         JMenu fileMenu = new JMenu("File");
 
         JMenuItem importItem = new JMenuItem("Import");
+        importItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         JMenuItem saveItem = new JMenuItem("Save");
+        saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
 
         importItem.addActionListener(e -> onImport());
         saveItem.addActionListener(e -> onSave());
@@ -79,7 +84,9 @@ public class MenuBar extends JMenuBar {
             photoPanel.changeImage(filepath);
             frame.setTitle(filename);
             lastImageMatrix = photoPanel.getImageMatrix();
+            originalImageMatrix = photoPanel.getImageMatrix();
             editMenu.setLastImageMatrix(lastImageMatrix);
+            editMenu.setOriginalImageMatrix(originalImageMatrix);
             optionPanel.refreshOnImport();
         }
     }
