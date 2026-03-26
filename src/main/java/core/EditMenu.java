@@ -72,24 +72,28 @@ public class EditMenu extends JMenu {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(lastImageMatrix);
         lastImageMatrix = temp;
+        optionPanel.updateHistogram();
     }
 
     private void onRevert() {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(originalImageMatrix);
         lastImageMatrix = temp;
+        optionPanel.updateHistogram();
     }
 
     private void onGrayScale() {
         lastImageMatrix = photoPanel.getImageMatrix();
         int[][][] newMatrix = ImageProcessor.applyGrayscale(lastImageMatrix);
         photoPanel.setImageMatrix(newMatrix);
+        optionPanel.updateHistogram();
     }
 
     private void onNegative() {
         lastImageMatrix = photoPanel.getImageMatrix();
         int[][][] newMatrix = ImageProcessor.applyNegative(lastImageMatrix);
         photoPanel.setImageMatrix(newMatrix);
+        optionPanel.updateHistogram();
     }
 
     public void setLastImageMatrix(int[][][] newMatrix) {

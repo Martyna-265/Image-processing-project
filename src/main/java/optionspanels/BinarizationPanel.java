@@ -64,6 +64,8 @@ public class BinarizationPanel extends JPanel {
             int[][][] newMatrix = ImageProcessor.applySegmentation(photoPanel.getImageMatrix(), t);
             photoPanel.setImageMatrix(newMatrix);
             originalMatrix = newMatrix;
+
+            parentPanel.updateHistogram();
         });
 
         this.add(titleLabel);

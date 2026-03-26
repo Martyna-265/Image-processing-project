@@ -695,4 +695,142 @@ public class ImageProcessor {
 
         return finalMatrix;
     }
+
+    // ==========================================================
+    // RGB & HSV
+    // ==========================================================
+
+    public static double[] rgbToHsv(int r, int g, int b) {
+        double rNorm = r / 255.0;
+        double gNorm = g / 255.0;
+        double bNorm = b / 255.0;
+
+        double cMax = Math.max(rNorm, Math.max(gNorm, bNorm));
+        double cMin = Math.min(rNorm, Math.min(gNorm, bNorm));
+        double delta = cMax - cMin;
+
+        double h = 0;
+        double s = 0;
+        double v = cMax * 255.0;
+
+        if (delta == 0) {
+            h = 0;
+        } else if (cMax == rNorm) {
+            h = 60 * (((gNorm - bNorm) / delta) % 6);
+        } else if (cMax == gNorm) {
+            h = 60 * (((bNorm - rNorm) / delta) + 2);
+        } else if (cMax == bNorm) {
+            h = 60 * (((rNorm - gNorm) / delta) + 4);
+        }
+
+        if (h < 0) {
+            h += 360;
+        }
+
+        if (cMax > 0) {
+            s = delta / cMax;
+        } else {
+            s = 0;
+        }
+
+        return new double[]{h, s, v};
+    }
+
+    public static int[] hsvToRgb(double h, double s, double v) {
+        double vNorm = v / 255.0;
+
+        double c = vNorm * s;
+        double x = c * (1 - Math.abs((h / 60.0) % 2 - 1));
+        double m = vNorm - c;
+
+        double rPrime = 0, gPrime = 0, bPrime = 0;
+
+        if (h >= 0 && h < 60) {
+            rPrime = c; gPrime = x; bPrime = 0;
+        } else if (h >= 60 && h < 120) {
+            rPrime = x; gPrime = c; bPrime = 0;
+        } else if (h >= 120 && h < 180) {
+            rPrime = 0; gPrime = c; bPrime = x;
+        } else if (h >= 180 && h < 240) {
+            rPrime = 0; gPrime = x; bPrime = c;
+        } else if (h >= 240 && h < 300) {
+            rPrime = x; gPrime = 0; bPrime = c;
+        } else if (h >= 300 && h < 360) {
+            rPrime = c; gPrime = 0; bPrime = x;
+        }
+
+        int r = (int) Math.round((rPrime + m) * 255);
+        int g = (int) Math.round((gPrime + m) * 255);
+        int b = (int) Math.round((bPrime + m) * 255);
+
+        r = Math.min(Math.max(r, 0), 255);
+        g = Math.min(Math.max(g, 0), 255);
+        b = Math.min(Math.max(b, 0), 255);
+
+        return new int[]{r, g, b};
+    }
+
+    // ==========================================================
+    // Histogram Equalization
+    // ==========================================================
+
+    public static int[][][] applyHistogramEqualization(int[][][] originalMatrix) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        double[][][] HSVMatrix = new double[height][width][3];
+        int[] histogramV = new int[256];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = originalMatrix[y][x][0];
+                int g = originalMatrix[y][x][1];
+                int b = originalMatrix[y][x][2];
+
+                HSVMatrix[y][x] = rgbToHsv(r, g, b);
+
+                histogramV[(int)Math.round(HSVMatrix[y][x][2])]++;
+            }
+        }
+
+        int[] cumHistV = new int[256];
+        cumHistV[0] = histogramV[0];
+        for (int i = 1; i < 256; i++) {
+            cumHistV[i] = cumHistV[i-1] + histogramV[i];
+        }
+
+        int CDFMin = 0;
+        for (int i = 0; i < 256; i++) {
+            if (cumHistV[i] > 0) {
+                CDFMin = cumHistV[i];
+                break;
+            }
+        }
+
+        int[] LUT = new int[256];
+        int N = width * height;
+        float denominator = Math.max(1, N - CDFMin);
+
+        for (int i = 0; i < 256; i++) {
+            int newValue = Math.round(((cumHistV[i] - CDFMin) / denominator) * 255);
+            LUT[i] = Math.min(Math.max(newValue, 0), 255);
+        }
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double H = HSVMatrix[y][x][0];
+                double S = HSVMatrix[y][x][1];
+                int V = (int) Math.round(HSVMatrix[y][x][2]);
+
+                int newV = LUT[V];
+                newMatrix[y][x] = hsvToRgb(H, S, newV);
+            }
+        }
+
+        return newMatrix;
+    }
+
 }

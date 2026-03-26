@@ -1,5 +1,7 @@
 package core;
 
+import optionspanels.HistogramPanel;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.KeyEvent;
@@ -55,6 +57,15 @@ public class MenuBar extends JMenuBar {
 
     private JMenu setupDisplayMenu(){
         JMenu displayMenu = new JMenu("Display");
+
+        JMenuItem showBrightnessHistogramItem = new JMenuItem("Show Brightness Histogram");
+        showBrightnessHistogramItem.addActionListener(e -> optionPanel.setHistogramMode(HistogramPanel.HistogramMode.BRIGHTNESS));
+
+        JMenuItem showRedHistogramItem = new JMenuItem("Show RGB Histograms");
+        showRedHistogramItem.addActionListener(e -> optionPanel.setHistogramMode(HistogramPanel.HistogramMode.COLOR));
+
+        displayMenu.add(showBrightnessHistogramItem);
+        displayMenu.add(showRedHistogramItem);
 
         return displayMenu;
     }

@@ -75,6 +75,8 @@ public class BlurringPanel extends JPanel {
                         photoPanel.getImageMatrix(), mask, parentPanel.getBoundaryMode());
                 photoPanel.setImageMatrix(newMatrix);
             }
+
+            parentPanel.updateHistogram();
         });
 
         this.add(titleLabel);

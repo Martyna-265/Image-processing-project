@@ -1,5 +1,8 @@
 package core;
 
+import optionspanels.HistogramPanel.HistogramMode;
+import optionspanels.HistogramPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,12 +15,20 @@ public class OptionPanel extends JPanel {
     private PhotoPanel photoPanel;
     private EditMenu editMenu;
     private BoundaryMode currentBoundaryMode = BoundaryMode.REPLICATE;
+    private JPanel toolArea;
+    private HistogramPanel histogramPanel;
 
     public OptionPanel(PhotoPanel photoPanel) {
         this.photoPanel = photoPanel;
 
         this.setLayout(new BorderLayout());
         this.setPreferredSize(new Dimension(400, 0));
+
+        toolArea = new JPanel(new BorderLayout());
+        this.add(toolArea, BorderLayout.NORTH);
+
+        histogramPanel = new HistogramPanel(photoPanel, this);
+        this.add(histogramPanel, BorderLayout.CENTER);
     }
 
     public void setEditMenu(EditMenu editMenu) {
@@ -39,26 +50,41 @@ public class OptionPanel extends JPanel {
     }
 
     public void refreshOnImport() {
-        this.removeAll();
-        this.setPreferredSize(new Dimension(400, 0));
+        toolArea.removeAll();
+        if (histogramPanel != null) {
+            histogramPanel.refreshHistograms();
+        }
         this.revalidate();
         this.repaint();
     }
 
     public void loadToolPanel(JPanel toolPanel) {
-        this.removeAll();
+        toolArea.removeAll();
 
         // always reset width to 400
-        this.setPreferredSize(new Dimension(400, 0));
+        //this.setPreferredSize(new Dimension(400, 0));
 
-        this.add(toolPanel, BorderLayout.CENTER);
+        toolArea.add(toolPanel, BorderLayout.CENTER);
 
         Window window = SwingUtilities.getWindowAncestor(this);
         if (window != null) {
             window.revalidate();
         }
 
-        this.revalidate();
-        this.repaint();
+        toolArea.revalidate();
+        toolArea.repaint();
+    }
+
+    public void updateHistogram() {
+        if (histogramPanel != null) {
+            histogramPanel.refreshHistograms();
+        }
+    }
+
+    public void setHistogramMode(HistogramMode mode) {
+        if (histogramPanel != null) {
+            histogramPanel.setMode(mode);
+        }
+        updateHistogram();
     }
 }

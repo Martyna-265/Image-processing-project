@@ -65,6 +65,8 @@ public class CustomMaskPanel extends JPanel {
             gridContainer.add(gridPanel);
             gridContainer.revalidate();
             gridContainer.repaint();
+
+            parentPanel.updateHistogram();
         };
 
         sizeSpinner.addChangeListener(e -> buildGrid.run());
@@ -88,6 +90,8 @@ public class CustomMaskPanel extends JPanel {
             int[][][] newMatrix = ImageProcessor.applyConvolution(
                     photoPanel.getImageMatrix(), customMask, parentPanel.getBoundaryMode());
             photoPanel.setImageMatrix(newMatrix);
+
+            parentPanel.updateHistogram();
         });
 
         this.add(titleLabel);

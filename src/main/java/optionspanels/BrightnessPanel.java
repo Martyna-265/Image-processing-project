@@ -40,6 +40,7 @@ public class BrightnessPanel extends JPanel {
             int offset = brightnessSlider.getValue();
             int[][][] newMatrix = ImageProcessor.applyBrightnessOffset(originalMatrix, offset);
             photoPanel.setImageMatrix(newMatrix);
+            parentPanel.updateHistogram();
         });
 
         JLabel rangeLabel = new JLabel("Extend brightness range to (N1, N2):");
@@ -71,6 +72,8 @@ public class BrightnessPanel extends JPanel {
                 originalMatrix = newMatrix;
                 brightnessSlider.setValue(0);
             }
+
+            parentPanel.updateHistogram();
         });
 
         this.add(titleLabel);
