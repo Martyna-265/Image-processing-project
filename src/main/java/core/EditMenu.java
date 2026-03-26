@@ -80,6 +80,7 @@ public class EditMenu extends JMenu {
         photoPanel.setImageMatrix(originalImageMatrix);
         lastImageMatrix = temp;
         optionPanel.updateHistogram();
+        optionPanel.refreshOnImport();
     }
 
     private void onGrayScale() {

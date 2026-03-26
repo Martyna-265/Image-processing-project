@@ -1,5 +1,14 @@
 package core;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -8,17 +17,68 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class PhotoPanel extends JPanel {
 
     private BufferedImage image;
     private Image scaledImage;
-    private Dimension maxDimension;
     private int[][][] imageMatrix;
+
+    private JPanel wrapperPanel;
+    private JPanel imageCanvas;
+    private ChartPanel topChartPanel;
+    private ChartPanel sideChartPanel;
+    private boolean showProjections = false;
 
     public PhotoPanel() {
         super();
+        this.setLayout(new GridBagLayout());
+        this.setBackground(UIManager.getColor("Panel.background"));
+
+        wrapperPanel = new JPanel(new GridBagLayout());
+        wrapperPanel.setOpaque(false);
+
+        imageCanvas = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (scaledImage != null) {
+                    g.drawImage(scaledImage, 0, 0, this);
+                }
+            }
+        };
+        imageCanvas.setOpaque(false);
+
+        topChartPanel = createEmptyChart(PlotOrientation.VERTICAL);
+        sideChartPanel = createEmptyChart(PlotOrientation.HORIZONTAL);
+
+        topChartPanel.setVisible(false);
+        sideChartPanel.setVisible(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        wrapperPanel.add(topChartPanel, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0;
+        JPanel corner = new JPanel();
+        corner.setOpaque(false);
+        wrapperPanel.add(corner, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        wrapperPanel.add(imageCanvas, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 1;
+        wrapperPanel.add(sideChartPanel, gbc);
+
+        GridBagConstraints gbcMain = new GridBagConstraints();
+        gbcMain.anchor = GridBagConstraints.NORTHWEST;
+        gbcMain.weightx = 1.0;
+        gbcMain.weighty = 1.0;
+
+        this.add(wrapperPanel, gbcMain);
 
         File imageFile = new File("src/testImage.jpg");
         try {
@@ -28,50 +88,126 @@ public class PhotoPanel extends JPanel {
             e.printStackTrace();
         }
 
-        addComponentListener(new ComponentAdapter() {
+        this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                maxDimension = new Dimension(getWidth(), getHeight());
-                repaint();
+                recalculateSize();
             }
         });
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void setShowProjections(boolean show) {
+        this.showProjections = show;
+        topChartPanel.setVisible(show);
+        sideChartPanel.setVisible(show);
+        recalculateSize();
+    }
 
-        if (maxDimension == null || image == null) {
-            return;
+    private ChartPanel createEmptyChart(PlotOrientation orientation) {
+        XYSeries series = new XYSeries("Projection");
+        XYSeriesCollection dataset = new XYSeriesCollection(series);
+
+        JFreeChart chart = ChartFactory.createXYAreaChart(
+                null, null, null, dataset, orientation, false, false, false
+        );
+
+        chart.getPlot().setBackgroundPaint(Color.DARK_GRAY);
+        chart.setBackgroundPaint(UIManager.getColor("Panel.background"));
+
+        chart.setPadding(new RectangleInsets(0, 0, 0, 0));
+
+        XYPlot plot = chart.getXYPlot();
+        plot.setInsets(new RectangleInsets(0, 0, 0, 0));
+        plot.setAxisOffset(new RectangleInsets(0, 0, 0, 0));
+        plot.setOutlineVisible(false);
+
+        plot.getDomainAxis().setVisible(false);
+        plot.getRangeAxis().setVisible(false);
+        plot.getDomainAxis().setLowerMargin(0.0);
+        plot.getDomainAxis().setUpperMargin(0.0);
+        plot.getRangeAxis().setLowerMargin(0.0);
+
+        plot.getRenderer().setSeriesPaint(0, new Color(100, 200, 255, 180));
+
+        ChartPanel cp = new ChartPanel(chart);
+        cp.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        return cp;
+    }
+
+    public void updateProjections() {
+        int[][] projections = ImageProcessor.getProjections(imageMatrix);
+        updateProjectionCharts(projections[0], projections[1]);
+    }
+
+    public void updateProjectionCharts(int[] verticalProj, int[] horizontalProj) {
+        if (topChartPanel != null) {
+            if (verticalProj != null) {
+                XYSeries vSeries = new XYSeries("Vertical");
+                for (int x = 0; x < verticalProj.length; x++) {
+                    vSeries.add(x, verticalProj[x]);
+                }
+                org.jfree.chart.plot.XYPlot topPlot = topChartPanel.getChart().getXYPlot();
+                topPlot.setDataset(new XYSeriesCollection(vSeries));
+            } else {
+                topChartPanel.getChart().getXYPlot().setDataset(null);
+            }
         }
 
-        Graphics2D g2d = (Graphics2D) g;
-        scaleImage();
-
-        g2d.drawImage(scaledImage, 0, 0, this);
+        if (sideChartPanel != null) {
+            if (horizontalProj != null) {
+                XYSeries hSeries = new XYSeries("Horizontal");
+                for (int y = 0; y < horizontalProj.length; y++) {
+                    hSeries.add(y, horizontalProj[y]);
+                }
+                org.jfree.chart.plot.XYPlot sidePlot = sideChartPanel.getChart().getXYPlot();
+                sidePlot.setDataset(new XYSeriesCollection(hSeries));
+                sidePlot.getDomainAxis().setInverted(true);
+            } else {
+                sideChartPanel.getChart().getXYPlot().setDataset(null);
+            }
+        }
     }
 
     public void recalculateSize() {
-        maxDimension = new Dimension(getWidth() - 200, getHeight() - 50);
-        revalidate();
-        repaint();
-    }
+        if (image == null) return;
 
+        int availW = this.getWidth();
+        int availH = this.getHeight();
 
-    private void scaleImage() {
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-        double imageScale = (double) imageWidth / imageHeight;
+        if (availW <= 0 || availH <= 0) return;
 
-        int newImageWidth = maxDimension.width;
-        int newImageHeight = (int) Math.round(newImageWidth / imageScale);
+        int chartThicknessX = showProjections ? 150 : 0;
+        int chartThicknessY = showProjections ? 100 : 0;
 
-        if (newImageHeight > maxDimension.height) {
-            newImageHeight = maxDimension.height;
-            newImageWidth = (int) Math.round(newImageHeight * imageScale);
-        }
+        int maxImgW = availW - chartThicknessX;
+        int maxImgH = availH - chartThicknessY;
 
-        scaledImage = image.getScaledInstance(newImageWidth, newImageHeight, Image.SCALE_SMOOTH);
+        if (maxImgW <= 0 || maxImgH <= 0) return;
+
+        double scale = Math.min((double) maxImgW / image.getWidth(), (double) maxImgH / image.getHeight());
+
+        int scaledW = (int) Math.round(image.getWidth() * scale);
+        int scaledH = (int) Math.round(image.getHeight() * scale);
+
+        scaledImage = image.getScaledInstance(scaledW, scaledH, Image.SCALE_SMOOTH);
+
+        Dimension imgDim = new Dimension(scaledW, scaledH);
+        imageCanvas.setPreferredSize(imgDim);
+        imageCanvas.setMinimumSize(imgDim);
+        imageCanvas.setMaximumSize(imgDim);
+
+        Dimension topDim = new Dimension(scaledW, chartThicknessY);
+        topChartPanel.setPreferredSize(topDim);
+        topChartPanel.setMinimumSize(topDim);
+        topChartPanel.setMaximumSize(topDim);
+
+        Dimension sideDim = new Dimension(chartThicknessX, scaledH);
+        sideChartPanel.setPreferredSize(sideDim);
+        sideChartPanel.setMinimumSize(sideDim);
+        sideChartPanel.setMaximumSize(sideDim);
+
+        wrapperPanel.revalidate();
+        wrapperPanel.repaint();
     }
 
     public void changeImage(String filepath){
@@ -79,30 +215,22 @@ public class PhotoPanel extends JPanel {
         try {
             image = ImageIO.read(imageFile);
             createImageMatrix();
+            recalculateSize();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        repaint();
     }
 
     private void createImageMatrix() {
         int width = image.getWidth();
         int height = image.getHeight();
-
         imageMatrix = new int[height][width][3];
-
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-
                 int rgb = image.getRGB(x, y);
-
-                int r = (rgb >> 16) & 0xFF;
-                int g = (rgb >> 8) & 0xFF;
-                int b = rgb & 0xFF;
-
-                imageMatrix[y][x][0] = r;
-                imageMatrix[y][x][1] = g;
-                imageMatrix[y][x][2] = b;
+                imageMatrix[y][x][0] = (rgb >> 16) & 0xFF;
+                imageMatrix[y][x][1] = (rgb >> 8) & 0xFF;
+                imageMatrix[y][x][2] = rgb & 0xFF;
             }
         }
     }
@@ -118,7 +246,7 @@ public class PhotoPanel extends JPanel {
 
         if (image.getWidth() != width || image.getHeight() != height) {
             image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            maxDimension = new Dimension(getWidth() - 200, getHeight() - 50);
+            recalculateSize();
         }
 
         for (int y = 0; y < height; y++) {
@@ -126,12 +254,15 @@ public class PhotoPanel extends JPanel {
                 int r = imageMatrix[y][x][0];
                 int g = imageMatrix[y][x][1];
                 int b = imageMatrix[y][x][2];
-
                 int rgb = (255 << 24) | (r << 16) | (g << 8) | b;
                 image.setRGB(x, y, rgb);
             }
         }
-        repaint();
+
+        if (imageCanvas.getPreferredSize().width > 0) {
+            scaledImage = image.getScaledInstance(imageCanvas.getPreferredSize().width, imageCanvas.getPreferredSize().height, Image.SCALE_SMOOTH);
+        }
+        if (imageCanvas != null) imageCanvas.repaint();
     }
 
     public BufferedImage getBufferedImage() {

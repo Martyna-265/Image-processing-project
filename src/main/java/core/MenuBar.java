@@ -1,5 +1,6 @@
 package core;
 
+import optionspanels.BinarizationPanel;
 import optionspanels.HistogramPanel;
 
 import javax.swing.*;
@@ -64,8 +65,16 @@ public class MenuBar extends JMenuBar {
         JMenuItem showRedHistogramItem = new JMenuItem("Show RGB Histograms");
         showRedHistogramItem.addActionListener(e -> optionPanel.setHistogramMode(HistogramPanel.HistogramMode.COLOR));
 
+        JCheckBoxMenuItem toggleProjectionsItem = new JCheckBoxMenuItem("Show Projections");
+        toggleProjectionsItem.addActionListener(e -> {
+            photoPanel.setShowProjections(toggleProjectionsItem.isSelected());
+            photoPanel.updateProjections();
+        });
+
         displayMenu.add(showBrightnessHistogramItem);
         displayMenu.add(showRedHistogramItem);
+        displayMenu.addSeparator();
+        displayMenu.add(toggleProjectionsItem);
 
         return displayMenu;
     }
@@ -99,6 +108,7 @@ public class MenuBar extends JMenuBar {
             editMenu.setLastImageMatrix(lastImageMatrix);
             editMenu.setOriginalImageMatrix(originalImageMatrix);
             optionPanel.refreshOnImport();
+            photoPanel.updateProjectionCharts(null, null);
         }
     }
 

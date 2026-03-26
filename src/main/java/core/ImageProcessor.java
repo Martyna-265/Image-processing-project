@@ -833,4 +833,29 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    // ==========================================================
+    // Projections
+    // ==========================================================
+
+    public static int[][] getProjections(int[][][] originalMatrix) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+
+        int[] verticalProj = new int[width];
+        int[] horizontalProj = new int[height];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (originalMatrix[y][x][0] == 0) {
+                    verticalProj[x]++;
+                    horizontalProj[y]++;
+                }
+            }
+        }
+
+        return new int[][] {verticalProj, horizontalProj};
+    }
+
 }

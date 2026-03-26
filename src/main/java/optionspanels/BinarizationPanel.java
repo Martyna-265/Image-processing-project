@@ -54,6 +54,8 @@ public class BinarizationPanel extends JPanel {
             spinnerLabel.setEnabled(true);
             thresholdSpinner.setEnabled(true);
             applyBinarizationBtn.setEnabled(true);
+
+            photoPanel.updateProjections();
         });
 
         applyBinarizationBtn.addActionListener(e -> {

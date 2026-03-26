@@ -79,6 +79,7 @@ public class OptionPanel extends JPanel {
         if (histogramPanel != null) {
             histogramPanel.refreshHistograms();
         }
+        photoPanel.updateProjections();
     }
 
     public void setHistogramMode(HistogramMode mode) {
