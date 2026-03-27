@@ -1358,4 +1358,69 @@ public class ImageProcessor {
         return new int[][] {verticalProj, horizontalProj};
     }
 
+    // ==========================================================
+    // MORPHOLOGY OPERATIONS
+    // ==========================================================
+
+    private static int[][][] applyMorphology(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode, boolean min) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        int windowSize = structuralElement.length;
+        int offset = windowSize / 2;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int minVal = 255;
+                int maxVal = 0;
+
+                for (int wy = -offset; wy <= offset; wy++) {
+                    for (int wx = -offset; wx <= offset; wx++) {
+
+                        if (structuralElement[wy + offset][wx + offset]) {
+                            int px = x + wx;
+                            int py = y + wy;
+
+                            int[] rgb = getPixelWithBoundary(originalMatrix, px, py, width, height, mode);
+                            int v = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
+
+                            if (v < minVal) {
+                                minVal = v;
+                            }
+                            if (v > maxVal) {
+                                maxVal = v;
+                            }
+                        }
+                    }
+                }
+
+                int r = originalMatrix[y][x][0];
+                int g = originalMatrix[y][x][1];
+                int b = originalMatrix[y][x][2];
+                double[] hsv = rgbToHsv(r, g, b);
+
+                if (min) {
+                    newMatrix[y][x] = hsvToRgb(hsv[0], hsv[1], minVal);
+                } else {
+                    newMatrix[y][x] = hsvToRgb(hsv[0], hsv[1], maxVal);
+                }
+
+            }
+        }
+
+        return newMatrix;
+    }
+
+    public static int[][][] applyErosion(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode) {
+        return applyMorphology(originalMatrix, structuralElement, mode, true);
+    }
+
+    public static int[][][] applyDilation(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode) {
+        return applyMorphology(originalMatrix, structuralElement, mode, false);
+    }
+
+
 }

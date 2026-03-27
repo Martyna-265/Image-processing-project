@@ -155,6 +155,7 @@ public class HistogramPanel extends JPanel{
         rangeAxis.setTickLabelPaint(Color.WHITE);
         rangeAxis.setAxisLinePaint(Color.WHITE);
         rangeAxis.setTickMarkPaint(Color.WHITE);
+        rangeAxis.setLowerMargin(0.0);
 
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));

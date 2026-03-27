@@ -35,6 +35,7 @@ public class EditMenu extends JMenu {
         JMenuItem undoItem = new JMenuItem("Undo");
         undoItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK));
         JMenuItem revertItem = new JMenuItem("Revert to original state");
+        JMenuItem morphologyItem = new JMenuItem("Morphology operations");
 
         // pixel operations menu
         JMenu pixelOperationsMenu = new JMenu("Pixel operations");
@@ -75,11 +76,13 @@ public class EditMenu extends JMenu {
         sharpeningItem.addActionListener(e -> optionPanel.loadToolPanel(new SharpeningPanel(photoPanel, optionPanel)));
         edgeDetectionItem.addActionListener(e -> optionPanel.loadToolPanel(new EdgeDetectionPanel(photoPanel, optionPanel)));
         customMaskItem.addActionListener(e -> optionPanel.loadToolPanel(new CustomMaskPanel(photoPanel, optionPanel)));
+        morphologyItem.addActionListener(e -> optionPanel.loadToolPanel(new MorphologyPanel(photoPanel, optionPanel)));
 
         this.add(undoItem);
         this.add(revertItem);
         this.add(pixelOperationsMenu);
         this.add(graphicFiltersMenu);
+        this.add(morphologyItem);
     }
 
     /**
