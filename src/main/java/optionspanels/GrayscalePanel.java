@@ -61,7 +61,7 @@ public class GrayscalePanel extends JPanel {
 
         JPanel shadesPanel = new JPanel();
         shadesPanel.add(new JLabel("Number of shades: "));
-        shadesSpinner = new JSpinner(new SpinnerNumberModel(256, 2, 256, 1));
+        shadesSpinner = new JSpinner(new SpinnerNumberModel(10, 2, 256, 1));
         shadesPanel.add(shadesSpinner);
 
         JPanel ditherPanel = new JPanel();
@@ -83,6 +83,7 @@ public class GrayscalePanel extends JPanel {
             this.repaint();
         });
 
+        // Apply
         JButton applyBtn = new JButton("Apply");
         applyBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 

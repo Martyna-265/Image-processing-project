@@ -228,22 +228,164 @@ public class ImageProcessor {
         return newMatrix;
     }
 
-    public static int[][][] applySegmentation(int[][][] originalMatrix, double t) {
+    // ==========================================================
+    // BINARIZATION
+    // ==========================================================
+
+    public static int[][][] applySegmentation(int[][][] originalMatrix, int... thresholds) {
         if (originalMatrix == null) return null;
 
         int height = originalMatrix.length;
         int width = originalMatrix[0].length;
         int[][][] newMatrix = new int[height][width][3];
 
+        java.util.Arrays.sort(thresholds);
+
+        int classes = thresholds.length + 1;
+        int[] colors = new int[classes];
+        for (int i = 0; i < classes; i++) {
+            colors[i] = (int) Math.round((255.0 / (classes - 1)) * i);
+        }
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 for (int c = 0; c < 3; c++) {
-                    int originalValue = originalMatrix[y][x][c];
-                    newMatrix[y][x][c] = (originalValue <= t) ? 255 : 0;
+                    int val = originalMatrix[y][x][c];
+
+                    int classIdx = classes - 1;
+                    for (int i = 0; i < thresholds.length; i++) {
+                        if (val <= thresholds[i]) {
+                            classIdx = i;
+                            break;
+                        }
+                    }
+                    newMatrix[y][x][c] = colors[classIdx];
                 }
             }
         }
         return newMatrix;
+    }
+
+    public static int[][][] applyOtsu(int[][][] originalMatrix) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        int[] hist = new int[256];
+        int N = height * width;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = originalMatrix[y][x][0];
+                int g = originalMatrix[y][x][1];
+                int b = originalMatrix[y][x][2];
+
+                int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+                hist[gray]++;
+            }
+        }
+
+        int bestThreshold = 0;
+        double maxVar = 0.0;
+
+        for (int t = 0; t < 256; t++) {
+            int pixels0 = 0;
+            int pixels1 = 0;
+            long sum0 = 0;
+            long sum1 = 0;
+
+            for (int i = 0; i <= t; i++) {
+                pixels0 += hist[i];
+                sum0 += (long) i * hist[i];
+            }
+            for (int i = t+1; i < 256; i++) {
+                pixels1 += hist[i];
+                sum1 += (long) i * hist[i];
+            }
+
+            if (pixels0 == 0 || pixels1 == 0) continue;
+
+            double w0 = (double) pixels0 / N;
+            double w1 = (double) pixels1 / N;
+            double avgBrightness0 = (double) sum0 / pixels0;
+            double avgBrightness1 = (double) sum1 / pixels1;
+            double var = w0 * w1 * Math.pow(avgBrightness0 - avgBrightness1, 2);
+
+            if (var > maxVar) {
+                maxVar = var;
+                bestThreshold = t;
+            }
+        }
+
+        return applySegmentation(originalMatrix, bestThreshold);
+    }
+
+    public static int[][][] applyMultiOtsu(int[][][] originalMatrix, int classes) {
+        if (originalMatrix == null || classes < 2) return originalMatrix;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int N = height * width;
+
+        int[] hist = new int[256];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = originalMatrix[y][x][0];
+                int g = originalMatrix[y][x][1];
+                int b = originalMatrix[y][x][2];
+                hist[(int)(0.299 * r + 0.587 * g + 0.114 * b)]++;
+            }
+        }
+
+        double[] P = new double[256];
+        double[] S = new double[256];
+        for (int i = 0; i < 256; i++) {
+            double p = (double) hist[i] / N;
+            P[i] = (i == 0) ? p : P[i - 1] + p;
+            S[i] = (i == 0) ? 0 : S[i - 1] + (i * p);
+        }
+
+        int numThresholds = classes - 1;
+        int[] bestThresholds = new int[numThresholds];
+        int[] currentThresholds = new int[numThresholds];
+        double[] maxVar = new double[]{0.0};
+
+        generateCombinations(0, 0, numThresholds, currentThresholds, bestThresholds, maxVar, P, S);
+
+        return applySegmentation(originalMatrix, bestThresholds);
+    }
+
+    private static void generateCombinations(int step, int startVal, int numThresholds, int[] current, int[] best, double[] maxVar, double[] P, double[] S) {
+        if (step == numThresholds) {
+            double currentVar = 0.0;
+            int lastT = -1;
+
+            for (int i = 0; i <= numThresholds; i++) {
+                int tStart = lastT + 1;
+                int tEnd = (i == numThresholds) ? 255 : current[i];
+                if (tStart > tEnd) return;
+
+                double w = P[tEnd] - (tStart > 0 ? P[tStart - 1] : 0);
+                if (w > 0) {
+                    double m = (S[tEnd] - (tStart > 0 ? S[tStart - 1] : 0)) / w;
+                    currentVar += w * m * m;
+                }
+                lastT = tEnd;
+            }
+
+            if (currentVar > maxVar[0]) {
+                maxVar[0] = currentVar;
+                System.arraycopy(current, 0, best, 0, numThresholds);
+            }
+            return;
+        }
+
+        for (int t = startVal; t < 256; t++) {
+            current[step] = t;
+            generateCombinations(step + 1, t + 1, numThresholds, current, best, maxVar, P, S);
+        }
     }
 
     // ==========================================================
