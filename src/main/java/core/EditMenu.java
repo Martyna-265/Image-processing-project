@@ -5,12 +5,26 @@ import optionspanels.*;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 
+/**
+ * Constructs the "Edit" dropdown menu for the top menu bar.
+ * Handles instant actions (Undo, Revert, Negative) and opens tool panels in the sidebar for operations that require
+ * additional user input.
+ */
 public class EditMenu extends JMenu {
     private PhotoPanel photoPanel;
     private int[][][] originalImageMatrix;
     private int[][][] lastImageMatrix;
     private OptionPanel optionPanel;
 
+    /**
+     * Constructs the Edit menu.
+     *
+     * @param s The title of the menu (e.g., "Edit").
+     * @param photoPanel The main image display panel.
+     * @param lastImageMatrix The previous image state matrix (for Undo).
+     * @param optionPanel The sidebar panel where tool UIs will be shown.
+     * @param originalImageMatrix The matrix representing the original version of the image (for Revert).
+     */
     public EditMenu(String s, PhotoPanel photoPanel, int[][][] lastImageMatrix, OptionPanel optionPanel, int[][][] originalImageMatrix) {
         super(s);
         this.photoPanel = photoPanel;
@@ -68,6 +82,9 @@ public class EditMenu extends JMenu {
         this.add(graphicFiltersMenu);
     }
 
+    /**
+     * Restores the image to its previous state (1 step back) and updates the histogram.
+     */
     private void onUndo() {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(lastImageMatrix);
@@ -75,6 +92,9 @@ public class EditMenu extends JMenu {
         optionPanel.updateHistogram();
     }
 
+    /**
+     * Reverts the image back to its original unmodified state (as it was when first imported).
+     */
     private void onRevert() {
         int[][][] temp = photoPanel.getImageMatrix();
         photoPanel.setImageMatrix(originalImageMatrix);
@@ -83,6 +103,9 @@ public class EditMenu extends JMenu {
         optionPanel.refreshOnImport();
     }
 
+    /**
+     * Applies a negative filter to the current image.
+     */
     private void onNegative() {
         lastImageMatrix = photoPanel.getImageMatrix();
         int[][][] newMatrix = ImageProcessor.applyNegative(lastImageMatrix);
@@ -90,10 +113,20 @@ public class EditMenu extends JMenu {
         optionPanel.updateHistogram();
     }
 
+    /**
+     * Updates the most recent image matrix state (saved for Undo).
+     *
+     * @param newMatrix The 3D array representing the most recent previous state of our image.
+     */
     public void setLastImageMatrix(int[][][] newMatrix) {
         this.lastImageMatrix = newMatrix;
     }
 
+    /**
+     * Updates the saved original image (for Revert).
+     *
+     * @param newMatrix The 3D array representing the original image.
+     */
     public void setOriginalImageMatrix(int[][][] newMatrix) {
         this.originalImageMatrix = newMatrix;
     }

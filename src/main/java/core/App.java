@@ -4,7 +4,17 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * The main entry point for the Image Processing Application.
+ * Initializes the FlatLaf dark theme, constructs the main application window,
+ * and assembles the core UI components (PhotoPanel, OptionPanel, MenuBar).
+ */
 public class App {
+    /**
+     * Main method. Sets up the main app frame and initializes its core components.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
 
         try {
