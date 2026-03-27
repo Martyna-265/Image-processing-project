@@ -10,6 +10,10 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 
+/**
+ * Constructs and manages the main application menu bar (File, Display, Edit, Settings).
+ * Responsible for importing/saving images.
+ */
 public class MenuBar extends JMenuBar {
     private PhotoPanel photoPanel;
     private int[][][] lastImageMatrix;
@@ -19,6 +23,13 @@ public class MenuBar extends JMenuBar {
     private EditMenu editMenu;
     private String currentFilename = "untitled_image";
 
+    /**
+     * Initializes the menu bar and builds all drop-down menus.
+     *
+     * @param frame The parent JFrame.
+     * @param photoPanel The main image display panel.
+     * @param optionPanel The sidebar tool panel.
+     */
     public MenuBar(JFrame frame, PhotoPanel photoPanel, OptionPanel optionPanel) {
         this.photoPanel = photoPanel;
         this.frame = frame;
@@ -39,6 +50,11 @@ public class MenuBar extends JMenuBar {
         add(settingsMenu);
     }
 
+    /**
+     * Constructs the "File" dropdown menu containing Import and Save actions.
+     *
+     * @return The fully configured File JMenu.
+     */
     private JMenu setupFileMenu(){
         JMenu fileMenu = new JMenu("File");
 
@@ -56,6 +72,12 @@ public class MenuBar extends JMenuBar {
         return fileMenu;
     }
 
+    /**
+     * Constructs the "Display" dropdown menu containing histogram toggles
+     * and projection chart toggles.
+     *
+     * @return The fully configured Display JMenu.
+     */
     private JMenu setupDisplayMenu(){
         JMenu displayMenu = new JMenu("Display");
 
@@ -79,6 +101,10 @@ public class MenuBar extends JMenuBar {
         return displayMenu;
     }
 
+    /**
+     * Opens a File Chooser to import a new image, updates the application state,
+     * and auto-generates a default save filename.
+     */
     private void onImport() {
         JFileChooser fc = new JFileChooser();
 
@@ -112,6 +138,9 @@ public class MenuBar extends JMenuBar {
         }
     }
 
+    /**
+     * Opens a File Chooser to save the current image to the disk.
+     */
     private void onSave() {
         JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("Save Image");
@@ -175,6 +204,13 @@ public class MenuBar extends JMenuBar {
         }
     }
 
+    /**
+     * Constructs the "Settings" dropdown menu with Boundary Mode
+     * configurations for convolution filters.
+     *
+     * @param optionPanel The sidebar panel that stores the current Boundary Mode.
+     * @return The fully configured Settings JMenu.
+     */
     private JMenu setupSettingsMenu(OptionPanel optionPanel) {
         JMenu settingsMenu = new JMenu("Settings");
         JMenu convMenu = new JMenu("Convolution filter options");

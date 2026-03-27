@@ -2,12 +2,22 @@ package core;
 
 import optionspanels.GrayscalePanel;
 
+/**
+ * Utility class that implements all image processing algorithms.
+ */
 public class ImageProcessor {
 
     // ==========================================================
     // PIXEL OPERATIONS
     // ==========================================================
 
+    /**
+     * Shifts the brightness of the image by adding a constant offset to every color channel.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param offset The value to add (-255 to 255).
+     * @return A new 3D array with adjusted brightness.
+     */
     public static int[][][] applyBrightnessOffset(int[][][] originalMatrix, int offset) {
         if (originalMatrix == null) return null;
 
@@ -26,6 +36,14 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Stretches or compresses the image's brightness histogram to fit within a new range [N1, N2].
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param N1 The new minimum brightness value.
+     * @param N2 The new maximum brightness value.
+     * @return A new 3D array with the adjusted brightness range.
+     */
     public static int[][][] applyBrightnessRange(int[][][] originalMatrix, int N1, int N2) {
         if (originalMatrix == null) return null;
 
@@ -60,6 +78,13 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Applies contrast correction.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param alpha The gamma factor.
+     * @return A new 3D array with adjusted contrast.
+     */
     public static int[][][] applyContrastPower(int[][][] originalMatrix, double alpha) {
         if (originalMatrix == null) return null;
 
@@ -93,6 +118,12 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Applies logarithmic contrast correction.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @return A new 3D array with logarithmic contrast applied.
+     */
     public static int[][][] applyContrastLog(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 
@@ -126,6 +157,13 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Converts an image to grayscale using various standard algorithms.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param option The chosen grayscale algorithm.
+     * @return A new 3D array representing the grayscale image.
+     */
     public static int[][][] applyGrayscale(int[][][] originalMatrix, GrayscalePanel.GrayscaleOptions option) {
         if (originalMatrix == null) return null;
 
@@ -172,6 +210,15 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Converts an image to grayscale and quantizes it down to a specific number of shades,
+     * optionally applying error diffusion (dithering).
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param option The quantization option (Custom or Custom Dithered).
+     * @param shades The number of grayscale shades to reduce the image to.
+     * @return A new 3D array representing the quantized grayscale image.
+     */
     public static int[][][] applyGrayscale(int[][][] originalMatrix, GrayscalePanel.GrayscaleOptions option, int shades) {
         if (originalMatrix == null) return null;
 
@@ -211,6 +258,12 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Inverts the colors of the image.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @return A new 3D array representing the negative image.
+     */
     public static int[][][] applyNegative(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 
@@ -232,6 +285,13 @@ public class ImageProcessor {
     // BINARIZATION
     // ==========================================================
 
+    /**
+     * Segments an image into multiple brightness classes based on an array of thresholds.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param thresholds An array of integer thresholds to split the image by.
+     * @return A segmented 3D array.
+     */
     public static int[][][] applySegmentation(int[][][] originalMatrix, int... thresholds) {
         if (originalMatrix == null) return null;
 
@@ -362,6 +422,12 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Calculates the binarization threshold using Otsu's method, then applies segmentation.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @return A binary 3D array (black and white).
+     */
     public static int[][][] applyOtsu(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 
@@ -418,6 +484,14 @@ public class ImageProcessor {
         return applySegmentation(originalMatrix, bestThreshold);
     }
 
+    /**
+     * A version of Otsu's method that finds multiple optimal thresholds
+     * for segmenting an image into several color levels between black and white.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param classes The number of segments/classes to divide the image into.
+     * @return A multi-level segmented 3D array.
+     */
     public static int[][][] applyMultiOtsu(int[][][] originalMatrix, int classes) {
         if (originalMatrix == null || classes < 2) return originalMatrix;
 
@@ -453,6 +527,19 @@ public class ImageProcessor {
         return applySegmentation(originalMatrix, bestThresholds);
     }
 
+    /**
+     * A helper function to recursively generate all possible combinations of thresholds for multi-level
+     * Otsu's method.
+     *
+     * @param step The current depth of the recursion.
+     * @param startVal The starting pixel intensity value to check.
+     * @param numThresholds The total number of thresholds needed (classes - 1).
+     * @param current The array holding the currently evaluated threshold combination.
+     * @param best The array holding the best threshold combination found so far.
+     * @param maxVar A 1-element array holding the maximum variance found so far.
+     * @param P The cumulative probability array of the image histogram.
+     * @param S The cumulative mean array of the image histogram.
+     */
     private static void generateCombinations(int step, int startVal, int numThresholds, int[] current, int[] best, double[] maxVar, double[] P, double[] S) {
         if (step == numThresholds) {
             double currentVar = 0.0;
@@ -488,6 +575,16 @@ public class ImageProcessor {
     // CONVOLUTION FILTERS
     // ==========================================================
 
+    /**
+     * Applies a convolution mask to a particular pixel.
+     *
+     * @param matrix The original 3D image array.
+     * @param centerX The X coordinate of the target pixel.
+     * @param centerY The Y coordinate of the target pixel.
+     * @param mask The 2D array representing the convolution kernel.
+     * @param mode The boundary handling rule for edges.
+     * @return A double array [R, G, B] containing the un-normalized convolution sum.
+     */
     private static double[] applyMaskToPixel(int[][][] matrix, int centerX, int centerY, double[][] mask, OptionPanel.BoundaryMode mode) {
         int maskSize = mask.length;
         int offset = maskSize / 2;
@@ -513,6 +610,14 @@ public class ImageProcessor {
         return new double[]{r, g, b};
     }
 
+    /**
+     * Applies a convolution mask to the entire image.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param mask The 2D kernel to apply.
+     * @param currentBoundaryMode The boundary handling rule for edges.
+     * @return A new 3D array representing the modified image.
+     */
     public static int[][][] applyConvolution(int[][][] originalMatrix, double[][] mask, OptionPanel.BoundaryMode currentBoundaryMode) {
         if (originalMatrix == null || mask == null) return null;
 
@@ -562,6 +667,17 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Retrieves a pixel's RGB values (applying the selected boundary logic for pixels outside the image).
+     *
+     * @param matrix The original 3D image array.
+     * @param x The requested X coordinate.
+     * @param y The requested Y coordinate.
+     * @param width The width of the image.
+     * @param height The height of the image.
+     * @param mode The boundary handling rule (e.g., MIRROR, PAD_BLACK).
+     * @return An integer array [R, G, B] of the fetched pixel.
+     */
     private static int[] getPixelWithBoundary(int[][][] matrix, int x, int y, int width, int height, OptionPanel.BoundaryMode mode) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return matrix[y][x];
@@ -593,6 +709,13 @@ public class ImageProcessor {
         }
     }
 
+    /**
+     * Generates an NxN averaging (Box Blur) mask.
+     *
+     * @param size The dimensions of the mask (e.g., 3 for a 3x3 mask).
+     * @param centerWeight The weight of the central pixel.
+     * @return A 2D array representing the averaging mask.
+     */
     public static double[][] getAveragingMask(int size, int centerWeight) {
         double[][] mask = new double[size][size];
         for (int i = 0; i < size; i++) {
@@ -604,6 +727,13 @@ public class ImageProcessor {
         return mask;
     }
 
+    /**
+     * Generates a Gaussian Blur mask based on a specified standard deviation.
+     * The size of the mask is automatically calculated as ceil(6 * sigma).
+     *
+     * @param sigma The standard deviation for the Gaussian distribution.
+     * @return A dynamically sized 2D array representing the Gaussian mask.
+     */
     public static double[][] getGaussianMask(double sigma) {
         int size = (int) Math.ceil(6 * sigma);
         if (size % 2 == 0) size++;
@@ -621,6 +751,12 @@ public class ImageProcessor {
         return mask;
     }
 
+    /**
+     * Retrieves a standard 3x3 Laplacian sharpening mask.
+     *
+     * @param type The type of mask ("Strong" includes diagonals, otherwise standard orthogonal).
+     * @return A 3x3 2D array representing the sharpening mask.
+     */
     public static double[][] getSharpeningMask(String type) {
         if ("Strong".equals(type)) {
             return new double[][] {
@@ -637,6 +773,15 @@ public class ImageProcessor {
         }
     }
 
+    /**
+     * Helper method to calculate the final pixel value for Laplacian sharpening.
+     *
+     * @param origVal The original color channel value of the pixel.
+     * @param response The raw output from Laplacian mask.
+     * @param strength The user-defined intensity multiplier.
+     * @param threshold The minimum response required to apply the sharpening.
+     * @return The clamped integer value (0-255) for the sharpened pixel.
+     */
     private static int applySharpeningMath(int origVal, double response, double strength, int threshold) {
         if (Math.abs(response) >= threshold) {
             int finalVal = (int) Math.round(origVal + (strength * response));
@@ -645,6 +790,19 @@ public class ImageProcessor {
         return origVal;
     }
 
+    /**
+     * Applies advanced sharpening techniques (e.g. Unsharp Masking, Laplacian of Gaussian (LoG)).
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param mode The sharpening algorithm ("Unsharp Masking" or "Laplacian").
+     * @param laplacianType The intensity of the Laplacian mask ("Standard" or "Strong").
+     * @param useLoG True to apply a Gaussian blur before running the Laplacian filter.
+     * @param sigma The standard deviation for the Gaussian blur.
+     * @param strength A multiplier applied to the sharpened edges before merging with the original image.
+     * @param threshold Edges below this threshold will be ignored to prevent sharpening noise.
+     * @param boundaryMode The rule for edge handling.
+     * @return A new 3D array representing the sharpened image.
+     */
     public static int[][][] applyAdvancedSharpening(
             int[][][] originalMatrix,
             String mode,
@@ -766,6 +924,14 @@ public class ImageProcessor {
     // EDGE DETECTION
     // ==========================================================
 
+    /**
+     * Applies standard masks to detect edges based on image gradients.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param operator The specific mathematical mask to apply (Sobel, Prewitt, Scharr, etc.).
+     * @param boundaryMode The rule for edge handling.
+     * @return A new 3D array representing the edge magnitudes.
+     */
     public static int[][][] applyEdgeDetection(int[][][] originalMatrix, String operator, OptionPanel.BoundaryMode boundaryMode) {
         if (originalMatrix == null) return null;
 
@@ -871,6 +1037,16 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Performs Canny Edge Detection.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param sigma The blur amount for the initial noise reduction pass.
+     * @param lowThresh The lower threshold for edge certainty classification; edges below it are discarded.
+     * @param highThresh The upper threshold for edge certainty classification; edges above it are strictly kept.
+     * @param boundaryMode The rule for edge handling.
+     * @return A binary 3D array showing thinned, tracked edges.
+     */
     public static int[][][] applyCannyEdgeDetection(int[][][] originalMatrix, double sigma, int lowThresh, int highThresh, OptionPanel.BoundaryMode boundaryMode) {
         if (originalMatrix == null) return null;
 
@@ -1002,6 +1178,11 @@ public class ImageProcessor {
     // RGB & HSV
     // ==========================================================
 
+    /**
+     * Converts an RGB color to the HSV color space.
+     *
+     * @return A double array [Hue (0-360), Saturation (0-1), Value (0-255)].
+     */
     public static double[] rgbToHsv(int r, int g, int b) {
         double rNorm = r / 255.0;
         double gNorm = g / 255.0;
@@ -1038,6 +1219,11 @@ public class ImageProcessor {
         return new double[]{h, s, v};
     }
 
+    /**
+     * Converts an HSV color back to the RGB color space.
+     *
+     * @return An integer array [R, G, B] constrained to 0-255.
+     */
     public static int[] hsvToRgb(double h, double s, double v) {
         double vNorm = v / 255.0;
 
@@ -1076,6 +1262,12 @@ public class ImageProcessor {
     // Histogram Equalization
     // ==========================================================
 
+    /**
+     * Equalizes the image histogram.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @return A new 3D array representing the equalized image.
+     */
     public static int[][][] applyHistogramEqualization(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 
@@ -1139,6 +1331,12 @@ public class ImageProcessor {
     // Projections
     // ==========================================================
 
+    /**
+     * Calculates the horizontal and vertical projections of black pixels in an image.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @return A 2D array containing [verticalProjectionArray, horizontalProjectionArray].
+     */
     public static int[][] getProjections(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 

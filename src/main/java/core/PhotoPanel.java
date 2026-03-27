@@ -19,6 +19,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+/**
+ * The main UI panel, responsible for displaying the image.
+ * Renders the scaled image, maintains its 3D image matrix, and draws projection charts if enabled.
+ */
 public class PhotoPanel extends JPanel {
 
     private BufferedImage image;
@@ -31,6 +35,9 @@ public class PhotoPanel extends JPanel {
     private ChartPanel sideChartPanel;
     private boolean showProjections = false;
 
+    /**
+     * Initializes PhotoPanel.
+     */
     public PhotoPanel() {
         super();
         this.setLayout(new GridBagLayout());
@@ -96,6 +103,11 @@ public class PhotoPanel extends JPanel {
         });
     }
 
+    /**
+     * Toggles the visibility of projection charts on the edges of the image.
+     *
+     * @param show True to display projections, false to hide.
+     */
     public void setShowProjections(boolean show) {
         this.showProjections = show;
         topChartPanel.setVisible(show);
@@ -103,6 +115,12 @@ public class PhotoPanel extends JPanel {
         recalculateSize();
     }
 
+    /**
+     * Initializes an empty chart for displaying image projections.
+     *
+     * @param orientation The layout orientation (VERTICAL for top chart, HORIZONTAL for side chart).
+     * @return A configured ChartPanel containing the empty projection plot.
+     */
     private ChartPanel createEmptyChart(PlotOrientation orientation) {
         XYSeries series = new XYSeries("Projection");
         XYSeriesCollection dataset = new XYSeriesCollection(series);
@@ -134,11 +152,20 @@ public class PhotoPanel extends JPanel {
         return cp;
     }
 
+    /**
+     * Updates the projection charts based on the current image.
+     */
     public void updateProjections() {
         int[][] projections = ImageProcessor.getProjections(imageMatrix);
         updateProjectionCharts(projections[0], projections[1]);
     }
 
+    /**
+     * A helper function that updates the top and side projection charts.
+     *
+     * @param verticalProj An array representing the vertical column sums of black pixels.
+     * @param horizontalProj An array representing the horizontal row sums of black pixels.
+     */
     public void updateProjectionCharts(int[] verticalProj, int[] horizontalProj) {
         if (topChartPanel != null) {
             if (verticalProj != null) {
@@ -168,6 +195,10 @@ public class PhotoPanel extends JPanel {
         }
     }
 
+    /**
+     * Recalculates the scaling of the image and projection charts to ensure they fit
+     * the available window space with correct aspect ratio.
+     */
     public void recalculateSize() {
         if (image == null) return;
 
@@ -210,6 +241,11 @@ public class PhotoPanel extends JPanel {
         wrapperPanel.repaint();
     }
 
+    /**
+     * Loads a new image from the hard drive, processes it into a matrix, and renders it.
+     *
+     * @param filepath The absolute path to the image file.
+     */
     public void changeImage(String filepath){
         File imageFile = new File(filepath);
         try {
@@ -221,6 +257,9 @@ public class PhotoPanel extends JPanel {
         }
     }
 
+    /**
+     * Converts a BufferedImage into a 3D pixel array [Y][X][RGB].
+     */
     private void createImageMatrix() {
         int width = image.getWidth();
         int height = image.getHeight();
@@ -235,10 +274,20 @@ public class PhotoPanel extends JPanel {
         }
     }
 
+    /**
+     * Retrieves the current image matrix.
+     *
+     * @return The 3D array [Y][X][RGB].
+     */
     public int[][][] getImageMatrix() {
         return imageMatrix;
     }
 
+    /**
+     * Updates the image matrix and redraws the BufferedImage to screen.
+     *
+     * @param imageMatrix The new 3D pixel array to display.
+     */
     public void setImageMatrix(int[][][] imageMatrix) {
         this.imageMatrix = imageMatrix;
         int height = imageMatrix.length;
@@ -265,6 +314,11 @@ public class PhotoPanel extends JPanel {
         if (imageCanvas != null) imageCanvas.repaint();
     }
 
+    /**
+     * Retrieves the BufferedImage object for the current image; mostly used for file saving.
+     *
+     * @return The current BufferedImage.
+     */
     public BufferedImage getBufferedImage() {
         return this.image;
     }
