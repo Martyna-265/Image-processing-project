@@ -46,7 +46,7 @@ public class BinarizationPanel extends JPanel {
 
         grayscaleBtn.addActionListener(e -> {
             parentPanel.saveUndoState(photoPanel.getImageMatrix());
-            int[][][] newMatrix = ImageProcessor.applyGrayscale(photoPanel.getImageMatrix());
+            int[][][] newMatrix = ImageProcessor.applyGrayscale(photoPanel.getImageMatrix(), GrayscalePanel.GrayscaleOptions.LUMINANCE);
             photoPanel.setImageMatrix(newMatrix);
             originalMatrix = newMatrix;
             isGrayscaleApplied = true;

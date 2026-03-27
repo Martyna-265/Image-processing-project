@@ -24,11 +24,11 @@ public class EditMenu extends JMenu {
 
         // pixel operations menu
         JMenu pixelOperationsMenu = new JMenu("Pixel operations");
-        JMenuItem grayScaleItem = new JMenuItem("Convert to gray scale");
-        JMenuItem negativeItem = new JMenuItem("Create a negative");
-        JMenuItem brightnessItem = new JMenuItem("Change brightness");
-        JMenuItem contrastItem = new JMenuItem("Change contrast");
-        JMenuItem binarizationItem = new JMenuItem("Apply binarization");
+        JMenuItem grayScaleItem = new JMenuItem("Grayscale");
+        JMenuItem negativeItem = new JMenuItem("Negative");
+        JMenuItem brightnessItem = new JMenuItem("Brightness");
+        JMenuItem contrastItem = new JMenuItem("Contrast");
+        JMenuItem binarizationItem = new JMenuItem("Binarization");
 
         pixelOperationsMenu.add(grayScaleItem);
         pixelOperationsMenu.add(negativeItem);
@@ -40,8 +40,8 @@ public class EditMenu extends JMenu {
         JMenu graphicFiltersMenu = new JMenu("Graphic filters");
         JMenuItem blurringItem = new JMenuItem("Blurring");
         JMenuItem sharpeningItem = new JMenuItem("Sharpening");
-        JMenuItem edgeDetectionItem = new JMenuItem("Edge Detection");
-        JMenuItem customMaskItem = new JMenuItem("Custom Mask");
+        JMenuItem edgeDetectionItem = new JMenuItem("Edge detection");
+        JMenuItem customMaskItem = new JMenuItem("Custom mask");
 
         graphicFiltersMenu.add(blurringItem);
         graphicFiltersMenu.add(sharpeningItem);
@@ -51,9 +51,9 @@ public class EditMenu extends JMenu {
         // instant actions
         undoItem.addActionListener(e -> onUndo());
         revertItem.addActionListener(e -> onRevert());
-        grayScaleItem.addActionListener(e -> onGrayScale());
         negativeItem.addActionListener(e -> onNegative());
 
+        grayScaleItem.addActionListener(e -> optionPanel.loadToolPanel(new GrayscalePanel(photoPanel, optionPanel)));
         brightnessItem.addActionListener(e -> optionPanel.loadToolPanel(new BrightnessPanel(photoPanel, optionPanel)));
         contrastItem.addActionListener(e -> optionPanel.loadToolPanel(new ContrastPanel(photoPanel, optionPanel)));
         binarizationItem.addActionListener(e -> optionPanel.loadToolPanel(new BinarizationPanel(photoPanel, optionPanel)));
@@ -81,13 +81,6 @@ public class EditMenu extends JMenu {
         lastImageMatrix = temp;
         optionPanel.updateHistogram();
         optionPanel.refreshOnImport();
-    }
-
-    private void onGrayScale() {
-        lastImageMatrix = photoPanel.getImageMatrix();
-        int[][][] newMatrix = ImageProcessor.applyGrayscale(lastImageMatrix);
-        photoPanel.setImageMatrix(newMatrix);
-        optionPanel.updateHistogram();
     }
 
     private void onNegative() {

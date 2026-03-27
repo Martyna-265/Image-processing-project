@@ -1,5 +1,7 @@
 package core;
 
+import optionspanels.GrayscalePanel;
+
 public class ImageProcessor {
 
     // ==========================================================
@@ -124,7 +126,7 @@ public class ImageProcessor {
         return newMatrix;
     }
 
-    public static int[][][] applyGrayscale(int[][][] originalMatrix) {
+    public static int[][][] applyGrayscale(int[][][] originalMatrix, GrayscalePanel.GrayscaleOptions option) {
         if (originalMatrix == null) return null;
 
         int height = originalMatrix.length;
@@ -136,12 +138,74 @@ public class ImageProcessor {
                 int r = originalMatrix[y][x][0];
                 int g = originalMatrix[y][x][1];
                 int b = originalMatrix[y][x][2];
-                int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+
+                int gray = 0;
+                int min = Math.min(r, Math.min(g, b));
+                int max = Math.max(r, Math.max(g, b));
+
+                if (option == GrayscalePanel.GrayscaleOptions.AVERAGING) {
+                    gray = Math.round((float) (r + g + b) / 3);
+                } else if (option == GrayscalePanel.GrayscaleOptions.LUMINANCE) {
+                    gray = (int) Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                } else if (option == GrayscalePanel.GrayscaleOptions.DESATURATION) {
+                    gray = Math.round((float) (max + min) / 2);
+                } else if (option == GrayscalePanel.GrayscaleOptions.DECOMPOSITION_MAX) {
+                    gray = max;
+                } else if (option == GrayscalePanel.GrayscaleOptions.DECOMPOSITION_MIN) {
+                    gray = min;
+                } else if (option == GrayscalePanel.GrayscaleOptions.SINGLE_RED) {
+                    gray = r;
+                } else if (option == GrayscalePanel.GrayscaleOptions.SINGLE_GREEN) {
+                    gray = g;
+                } else if (option == GrayscalePanel.GrayscaleOptions.SINGLE_BLUE) {
+                    gray = b;
+                }
+
+                gray = Math.min(Math.max(gray, 0), 255);
 
                 newMatrix[y][x][0] = gray;
                 newMatrix[y][x][1] = gray;
                 newMatrix[y][x][2] = gray;
             }
+        }
+
+        return newMatrix;
+    }
+
+    public static int[][][] applyGrayscale(int[][][] originalMatrix, GrayscalePanel.GrayscaleOptions option, int shades) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        double factor = 255.0 / (shades - 1);
+        int errorVal = 0;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = originalMatrix[y][x][0];
+                int g = originalMatrix[y][x][1];
+                int b = originalMatrix[y][x][2];
+
+                int gray = 0;
+                int avgVal = Math.round((float) (r + g + b) / 3);
+
+                if (option == GrayscalePanel.GrayscaleOptions.CUSTOM) {
+                    gray = (int) Math.round(Math.round(avgVal / factor) * factor);
+                } else if (option == GrayscalePanel.GrayscaleOptions.CUSTOM_DITHERED) {
+                    int tempGray = avgVal + errorVal;
+                    gray = (int) Math.round(Math.round(tempGray / factor) * factor);
+                    errorVal += avgVal - gray;
+                }
+
+                gray = Math.min(Math.max(gray, 0), 255);
+
+                newMatrix[y][x][0] = gray;
+                newMatrix[y][x][1] = gray;
+                newMatrix[y][x][2] = gray;
+            }
+            errorVal = 0;
         }
 
         return newMatrix;
@@ -576,7 +640,7 @@ public class ImageProcessor {
         int width = originalMatrix[0].length;
 
         // 1. gaussian blur & greyscale
-        int[][][] grayMatrix = applyGrayscale(originalMatrix);
+        int[][][] grayMatrix = applyGrayscale(originalMatrix, GrayscalePanel.GrayscaleOptions.LUMINANCE);
         double[][] gaussMask = getGaussianMask(sigma);
         int[][][] blurredMatrix = applyConvolution(grayMatrix, gaussMask, boundaryMode);
 
