@@ -49,7 +49,7 @@ public class BinarizationPanel extends JPanel {
 
         // Niblack
         JPanel niblackPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        JSpinner niblackWinSpinner = new JSpinner(new SpinnerNumberModel(15, 3, 99, 2)); // Tylko nieparzyste
+        JSpinner niblackWinSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 99, 2)); // Tylko nieparzyste
         JSpinner niblackKSpinner = new JSpinner(new SpinnerNumberModel(-0.2, -1.0, 1.0, 0.1));
         niblackPanel.add(new JLabel("Window Size: "));
         niblackPanel.add(niblackWinSpinner);
@@ -58,8 +58,8 @@ public class BinarizationPanel extends JPanel {
 
         // Bernsen
         JPanel bernsenPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        JSpinner bernsenWinSpinner = new JSpinner(new SpinnerNumberModel(15, 3, 99, 2));
-        JSpinner bernsenContrastSpinner = new JSpinner(new SpinnerNumberModel(15, 0, 255, 1));
+        JSpinner bernsenWinSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 99, 2));
+        JSpinner bernsenContrastSpinner = new JSpinner(new SpinnerNumberModel(20, 0, 255, 1));
         bernsenPanel.add(new JLabel("Window Size: "));
         bernsenPanel.add(bernsenWinSpinner);
         bernsenPanel.add(new JLabel("Contrast Limit: "));
@@ -82,7 +82,7 @@ public class BinarizationPanel extends JPanel {
 
         // Custom threshold
         JPanel customPanel = new JPanel();
-        JSpinner thresholdSpinner = new JSpinner(new SpinnerNumberModel(128.0, 0.0, 255.0, 1.0));
+        JSpinner thresholdSpinner = new JSpinner(new SpinnerNumberModel(128, 0, 255, 1));
         customPanel.add(new JLabel("Threshold: "));
         customPanel.add(thresholdSpinner);
 
@@ -128,14 +128,12 @@ public class BinarizationPanel extends JPanel {
             else if ("Niblack".equals(selectedMethod)) {
                 int windowSize = (Integer) niblackWinSpinner.getValue();
                 double k = (Double) niblackKSpinner.getValue();
-                // TODO: newMatrix = ImageProcessor.applyNiblack(currentMatrix, windowSize, k);
-                newMatrix = ImageProcessor.applySegmentation(currentMatrix, 100);
+                newMatrix = ImageProcessor.applyNiblack(currentMatrix, windowSize, k, parentPanel.getBoundaryMode());
             }
             else if ("Bernsen".equals(selectedMethod)) {
                 int windowSize = (Integer) bernsenWinSpinner.getValue();
                 int contrastLimit = (Integer) bernsenContrastSpinner.getValue();
-                // TODO: newMatrix = ImageProcessor.applyBernsen(currentMatrix, windowSize, contrastLimit)
-                newMatrix = ImageProcessor.applySegmentation(currentMatrix, 100);
+                newMatrix = ImageProcessor.applyBernsen(currentMatrix, windowSize, contrastLimit, parentPanel.getBoundaryMode());
             }
             else if ("Multi-Otsu".equals(selectedMethod)) {
                 int classes = (Integer) multiOtsuClasses.getValue();

@@ -266,6 +266,102 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    public static int[][][] applyNiblack(int[][][] originalMatrix, int windowSize, double k, OptionPanel.BoundaryMode boundaryMode) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        int offset = windowSize / 2;
+        int N = windowSize * windowSize;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+
+                long sum = 0;
+                long sumSquares = 0;
+
+                for (int wy = -offset; wy <= offset; wy++) {
+                    for (int wx = -offset; wx <= offset; wx++) {
+                        int px = x + wx;
+                        int py = y + wy;
+
+                        int[] rgb = getPixelWithBoundary(originalMatrix, px, py, width, height, boundaryMode);
+                        int val = rgb[0];
+
+                        sum += val;
+                        sumSquares += (long) val * val;
+                    }
+                }
+
+                double mean = (double) sum / N;
+
+                double variance = ((double) sumSquares / N) - (mean * mean);
+                if (variance < 0) variance = 0;
+                double stdDev = Math.sqrt(variance);
+
+                double T = mean + (k * stdDev);
+                int originalValue = originalMatrix[y][x][0];
+                int color = (originalValue <= T) ? 0 : 255;
+
+                newMatrix[y][x][0] = color;
+                newMatrix[y][x][1] = color;
+                newMatrix[y][x][2] = color;
+            }
+        }
+
+        return newMatrix;
+    }
+
+    public static int[][][] applyBernsen(int[][][] originalMatrix, int windowSize, int contrastLimit, OptionPanel.BoundaryMode boundaryMode) {
+        if (originalMatrix == null) return null;
+
+        int height = originalMatrix.length;
+        int width = originalMatrix[0].length;
+        int[][][] newMatrix = new int[height][width][3];
+
+        int offset = windowSize / 2;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+
+                int minVal = 255;
+                int maxVal = 0;
+
+                for (int wy = -offset; wy <= offset; wy++) {
+                    for (int wx = -offset; wx <= offset; wx++) {
+                        int px = x + wx;
+                        int py = y + wy;
+
+                        int[] rgb = getPixelWithBoundary(originalMatrix, px, py, width, height, boundaryMode);
+                        int val = rgb[0];
+
+                        if (val < minVal) minVal = val;
+                        if (val > maxVal) maxVal = val;
+                    }
+                }
+
+                int contrast = maxVal - minVal;
+                int midPoint = (maxVal + minVal) / 2;
+                int originalValue = originalMatrix[y][x][0];
+                int color;
+
+                if (contrast < contrastLimit) {
+                    color = (midPoint >= 128) ? 255 : 0;
+                } else {
+                    color = (originalValue <= midPoint) ? 0 : 255;
+                }
+
+                newMatrix[y][x][0] = color;
+                newMatrix[y][x][1] = color;
+                newMatrix[y][x][2] = color;
+            }
+        }
+
+        return newMatrix;
+    }
+
     public static int[][][] applyOtsu(int[][][] originalMatrix) {
         if (originalMatrix == null) return null;
 
