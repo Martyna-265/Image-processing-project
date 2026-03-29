@@ -110,7 +110,7 @@ public class HistogramPanel extends JPanel{
                 this.histogramGreen[g]++;
                 this.histogramBlue[b]++;
 
-                int gray = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+                int gray = (int)(r + g + b) / 3;
                 this.histogramGray[gray]++;
             }
         }

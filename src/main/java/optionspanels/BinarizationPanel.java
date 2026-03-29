@@ -49,7 +49,7 @@ public class BinarizationPanel extends JPanel {
 
         // Niblack
         JPanel niblackPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        JSpinner niblackWinSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 99, 2)); // Tylko nieparzyste
+        JSpinner niblackWinSpinner = new JSpinner(new SpinnerNumberModel(11, 3, 99, 2));
         JSpinner niblackKSpinner = new JSpinner(new SpinnerNumberModel(-0.2, -1.0, 1.0, 0.1));
         niblackPanel.add(new JLabel("Window Size: "));
         niblackPanel.add(niblackWinSpinner);
@@ -58,7 +58,7 @@ public class BinarizationPanel extends JPanel {
 
         // Bernsen
         JPanel bernsenPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        JSpinner bernsenWinSpinner = new JSpinner(new SpinnerNumberModel(10, 3, 99, 2));
+        JSpinner bernsenWinSpinner = new JSpinner(new SpinnerNumberModel(11, 3, 99, 2));
         JSpinner bernsenContrastSpinner = new JSpinner(new SpinnerNumberModel(20, 0, 255, 1));
         bernsenPanel.add(new JLabel("Window Size: "));
         bernsenPanel.add(bernsenWinSpinner);
@@ -98,7 +98,7 @@ public class BinarizationPanel extends JPanel {
             cl.show(cardsPanel, (String) typeComboBox.getSelectedItem());
         });
 
-        JButton applyBinarizationBtn = new JButton("Apply Segmentation");
+        JButton applyBinarizationBtn = new JButton("Apply");
         applyBinarizationBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         applyBinarizationBtn.setEnabled(false);
 

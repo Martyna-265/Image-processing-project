@@ -34,7 +34,7 @@ public class EditMenu extends JMenu {
 
         JMenuItem undoItem = new JMenuItem("Undo");
         undoItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK));
-        JMenuItem revertItem = new JMenuItem("Revert to original state");
+        JMenuItem revertItem = new JMenuItem("Revert to the original state");
         JMenuItem morphologyItem = new JMenuItem("Morphology operations");
 
         // pixel operations menu

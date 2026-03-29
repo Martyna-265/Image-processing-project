@@ -34,7 +34,7 @@ public class MorphologyPanel extends JPanel {
 
         JPanel sizePanel = new JPanel();
         sizePanel.setMaximumSize(new Dimension(300, 40));
-        JSpinner sizeSpinner = new JSpinner(new SpinnerNumberModel(3, 3, 21, 2)); // tylko nieparzyste
+        JSpinner sizeSpinner = new JSpinner(new SpinnerNumberModel(3, 3, 9, 2)); // tylko nieparzyste
         sizePanel.add(new JLabel("Structuring Element Size (NxN): "));
         sizePanel.add(sizeSpinner);
 
