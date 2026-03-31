@@ -158,7 +158,7 @@ public class ImageProcessor {
     }
 
     /**
-     * Converts an image to grayscale using various standard algorithms.
+     * Converts an image to grayscale using the standard conversion algorithm selected via the provided option.
      *
      * @param originalMatrix The 3D array representing the image.
      * @param option The chosen grayscale algorithm.
@@ -211,8 +211,8 @@ public class ImageProcessor {
     }
 
     /**
-     * Converts an image to grayscale and quantizes it down to a specific number of shades,
-     * optionally applying error diffusion (dithering).
+     * Converts an image to grayscale using a quantization algorithm that limits the output
+     * to a specific number of shades, optionally applying dithering.
      *
      * @param originalMatrix The 3D array representing the image.
      * @param option The quantization option (Custom or Custom Dithered).
@@ -326,6 +326,15 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Calculates the binarization thresholds for each pixel using Niblack's method, then applies segmentation.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param windowSize The window size for the sliding window.
+     * @param k The sensitivity parameter.
+     * @param boundaryMode The boundary handling rule for edges.
+     * @return A binary 3D array (black and white).
+     */
     public static int[][][] applyNiblack(int[][][] originalMatrix, int windowSize, double k, OptionPanel.BoundaryMode boundaryMode) {
         if (originalMatrix == null) return null;
 
@@ -374,6 +383,15 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Calculates the binarization thresholds for each pixel using Bernsen's method, then applies segmentation.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param windowSize The window size for the sliding window.
+     * @param contrastLimit The minimum local contrast required to apply dynamic thresholding.
+     * @param boundaryMode The boundary handling rule for edges.
+     * @return A binary 3D array (black and white).
+     */
     public static int[][][] applyBernsen(int[][][] originalMatrix, int windowSize, int contrastLimit, OptionPanel.BoundaryMode boundaryMode) {
         if (originalMatrix == null) return null;
 
@@ -1362,6 +1380,16 @@ public class ImageProcessor {
     // MORPHOLOGY OPERATIONS
     // ==========================================================
 
+    /**
+     * Applies a morphological operation (erosion or dilation) to the image based on the specified structuring element.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param structuralElement The 2D boolean array representing the active cells of the structuring element.
+     * @param mode The boundary handling rule for edges.
+     * @param min A boolean flag determining the operation type: true to perform erosion (calculating the local minimum),
+     *           or false to perform dilation (calculating the local maximum).
+     * @return A new 3D array representing the modified color image.
+     */
     private static int[][][] applyMorphology(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode, boolean min) {
         if (originalMatrix == null) return null;
 
@@ -1414,10 +1442,26 @@ public class ImageProcessor {
         return newMatrix;
     }
 
+    /**
+     * Applies erosion to the image based on the specified structuring element.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param structuralElement The 2D boolean array representing the active cells of the structuring element.
+     * @param mode The boundary handling rule for edges.
+     * @return A new 3D array representing the modified color image.
+     */
     public static int[][][] applyErosion(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode) {
         return applyMorphology(originalMatrix, structuralElement, mode, true);
     }
 
+    /**
+     * Applies dilation to the image based on the specified structuring element.
+     *
+     * @param originalMatrix The 3D array representing the image.
+     * @param structuralElement The 2D boolean array representing the active cells of the structuring element.
+     * @param mode The boundary handling rule for edges.
+     * @return A new 3D array representing the modified color image.
+     */
     public static int[][][] applyDilation(int[][][] originalMatrix, boolean[][] structuralElement, OptionPanel.BoundaryMode mode) {
         return applyMorphology(originalMatrix, structuralElement, mode, false);
     }
