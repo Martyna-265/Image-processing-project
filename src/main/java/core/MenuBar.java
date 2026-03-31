@@ -218,12 +218,12 @@ public class MenuBar extends JMenuBar {
         ButtonGroup group = new ButtonGroup();
 
         JRadioButtonMenuItem cropItem = new JRadioButtonMenuItem("Crop the image");
-        JRadioButtonMenuItem keepItem = new JRadioButtonMenuItem("Copy original pixels");
+        JRadioButtonMenuItem keepItem = new JRadioButtonMenuItem("Keep original pixels");
         JRadioButtonMenuItem blackItem = new JRadioButtonMenuItem("Assume outside is black");
         JRadioButtonMenuItem whiteItem = new JRadioButtonMenuItem("Assume outside is white");
         JRadioButtonMenuItem grayItem = new JRadioButtonMenuItem("Assume outside is gray");
         JRadioButtonMenuItem copyItem = new JRadioButtonMenuItem("Copy outer-most pixel");
-        JRadioButtonMenuItem mirrorItem = new JRadioButtonMenuItem("Mirror pixels");
+        JRadioButtonMenuItem mirrorItem = new JRadioButtonMenuItem("Mirror outer-most pixels");
 
         // set default
         copyItem.setSelected(true);
