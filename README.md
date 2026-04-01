@@ -29,6 +29,17 @@ The project is a desktop application implemented in Java made for the Biometrics
 
 # Graphic filters
 
+**Blurring** is available through either a simple Box Blur or Gaussian Blur; the image below has been modified using Gaussian Blur with $\sigma=10$.
+![Gaussian Blur with $\sigma=10$](images/blur_gauss_10.png)
+
+**Sharpening** can be done using either Laplacian-based sharpening or Unsharp Masking; the image below is a result of Unsharp Masking with $\sigma=2$, $s=1$, $T=20$.
+![Unsharp Masking with $\sigma=2$, $s=1$, $T=20$](images/sharp_unsharp_2.png)
+
+**Edge Detection** can be done using Laplace operator, 2-directional Sobel or Roberts Cross operators, 8-directional Sobel Compass or Prewitt Compass operators, and the Canny Algorithm. The image below is a result of the Canny Edge Detection.
+![Canny Edge Detection](images/edge_canny.png)
+
+In this section, the user can also input their own **Custom Mask**. 
+
 # Morphology operations
 
 There are four available morphology operations - **erosion, dilation, opening** and **closing**. The image below shows the usage of erosion using a 3x3 square structuring element.
