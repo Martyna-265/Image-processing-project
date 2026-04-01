@@ -2,6 +2,10 @@
 
 The project is a desktop application implemented in Java made for the Biometrics course during the sixth semester (2025/2026) at the Warsaw University of Technology. Our image-processing application supports a range of operations on imported images. It allows users to perform grayscaling, binarization, brightness and contrast adjustments, alongside graphic filters for blurring, sharpening, and edge detection -all utilizing various algorithms. The software supports morphological operations, image inversion, and histogram equalization. Apart from that, it displays real-time brightness histograms and spatial projections. After applying the chosen modifications, the processed image can be easily exported and saved locally. Full documentation is available in the [Documentation.pdf](Documentation.pdf) file.
 
+# App UI
+
+![Grayscale using luminance](images/image_processing_ui.png)
+
 # Available functionalities
 
 - **Importing and saving images**
